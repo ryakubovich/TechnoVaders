@@ -13,15 +13,34 @@ public:
   // Разрешаем конструирование по умолчанию.
   Point2D() = default;
 
-  // Конструктор копирования.
-  Point2D(Point2D const & obj)
-    : m_x(obj.m_x), m_y(obj.m_y)
-  {}
-
   // Конструктор с параметрами.
   Point2D(float x, float y)
     : m_x(x), m_y(y)
   {}
+
+  // Copy semantics
+  Point2D(Point2D const & obj)
+    : m_x(obj.m_x), m_y(obj.m_y)
+  {}
+
+  Point2D & operator = (Point2D const & obj)
+  {
+    if (this == &obj) return *this;
+    m_x = obj.m_x;
+    m_y = obj.m_y;
+    return *this;
+  }
+
+  // Move semantics
+  Point2D(Point2D && obj)
+    : m_x(obj.m_x), m_y(obj.m_y) { obj.m_x = 0; obj.m_y = 0; }
+
+  Point2D & operator = (Point2D && obj)
+  {
+    std::swap(m_x, obj.m_x);
+    std::swap(m_y, obj.m_y);
+    return *this;
+  }
 
   // Оператор логического равенства.
   bool operator == (Point2D const & obj) const
@@ -43,15 +62,6 @@ public:
     auto it = lst.begin();
     for (int i = 0; i < count && it != lst.end(); i++, ++it)
       *vals[i] = *it;
-  }
-
-  // Оператор присваивания.
-  Point2D & operator = (Point2D const & obj)
-  {
-    if (this == &obj) return *this;
-    m_x = obj.m_x;
-    m_y = obj.m_y;
-    return *this;
   }
 
   // Оператор логического неравенства.
@@ -94,7 +104,8 @@ public:
   // Деление на число.
   Point2D operator / (float scale) const
   {
-    //TODO: обработать деление на 0.
+    if (EqualWithEps(scale, 0.0f))
+      return *this;
     return { m_x / scale, m_y / scale };
   }
 
@@ -121,7 +132,8 @@ public:
 
   Point2D & operator /= (float scale)
   {
-    //TODO: обработать деление на 0.
+    if (EqualWithEps(scale, 0.0f))
+      return *this;
     m_x /= scale;
     m_y /= scale;
     return *this;
@@ -154,8 +166,8 @@ private:
   float m_x = 0.0f, m_y = 0.0f;
 };
 
-std::ostream & operator << (std::ostream & os, Point2D const & obj)
+inline std::ostream & operator << (std::ostream & os, Point2D const & obj)
 {
-os << "Point2D {" << obj.x() << ", " << obj.y() << "}";
+  os << "Point2D {" << obj.x() << ", " << obj.y() << "}";
   return os;
 }
