@@ -7,10 +7,11 @@ project(template)
 
 # Set up the main source folder.
 set(SOURCE_ROOT src)
+FILE(GLOB_RECURSE HEAD_LIST "src/*.hpp")
 # Scan source folder to find all sources and put the result to SRC_LIST.
 aux_source_directory(${SOURCE_ROOT} SRC_LIST)
 # Create executable by SRC_LIST.
-add_executable(${PROJECT_NAME} ${SRC_LIST})
+add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEAD_LIST})
 
 # Add subdirectory with Google Test Library.
 add_subdirectory(3party/googletest)
@@ -31,3 +32,4 @@ add_executable(${PROJECT_TEST_NAME} ${TEST_SRC_FILES})
 target_link_libraries(${PROJECT_TEST_NAME} gtest gtest_main)
 # Finish tests setting up.
 add_test(test ${PROJECT_TEST_NAME})
+#SET(CMAKE_BUILD_TYPE Debug)
