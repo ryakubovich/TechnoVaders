@@ -32,4 +32,4 @@ add_executable(${PROJECT_TEST_NAME} ${TEST_SRC_FILES})
 target_link_libraries(${PROJECT_TEST_NAME} gtest gtest_main)
 # Finish tests setting up.
 add_test(test ${PROJECT_TEST_NAME})
-#SET(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
