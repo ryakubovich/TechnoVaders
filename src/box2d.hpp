@@ -11,9 +11,6 @@ public:
   // Конструктор по умолчанию
   Box2D() = default;
 
-  // Почему при конструировании через { Point2D(...), Point2D(...) } вызывается
-  // конструктор initializer_list?
-  // Конструктор с параметрами Points
   Box2D(Point2D const & obj1, Point2D const & obj2)
     : pnt1(obj1), pnt2(obj2)
   {
@@ -30,19 +27,23 @@ public:
       bool y = pnt1.y() > pnt2.y();
       if (x && y)
       {
+        Point2D tmp = pnt1;
         pnt1 = Point2D(pnt2.x(), pnt2.y());
-        pnt2 = Point2D(pnt1.y(), pnt1.y());
+        pnt2 = tmp;
       }
-      if (x)
+      else if (x)
       {
+        float tmp = pnt1.x();
         pnt1 = Point2D(pnt2.x(), pnt1.y());
-        pnt2 = Point2D(pnt1.x(), pnt2.y());
+        pnt2 = Point2D(tmp, pnt2.y());
       }
-      if (y)
+      else if (y)
       {
+        float tmp = pnt1.y();
         pnt1 = Point2D(pnt1.x(), pnt2.y());
-        pnt2 = Point2D(pnt2.x(), pnt1.y());
+        pnt2 = Point2D(pnt2.x(), tmp);
       }
+      std::cout << "Initial arguments " << obj1 << " " << obj2 << std::endl;
       std::cout << "In constructor " << pnt1 << " " << pnt2 << std::endl;
     }
   }
@@ -64,37 +65,68 @@ public:
       bool y = pnt1.y() > pnt2.y();
       if (x && y)
       {
-        pnt1 = Point2D(x_2 ,y_2);
-        pnt2 = Point2D(x_1, y_1);
+        Point2D tmp = pnt1;
+        pnt1 = Point2D(pnt2.x(), pnt2.y());
+        pnt2 = tmp;
       }
-      if (x)
+      else if (x)
       {
-        pnt1 = Point2D(x_2 ,y_1);
-        pnt2 = Point2D(x_1, y_2);
+        float tmp = pnt1.x();
+        pnt1 = Point2D(pnt2.x(), pnt1.y());
+        pnt2 = Point2D(tmp, pnt2.y());
       }
-      if (y)
+      else if (y)
       {
-        pnt1 = Point2D(x_1 ,y_2);
-        pnt2 = Point2D(x_2, y_1);
+        float tmp = pnt1.y();
+        pnt1 = Point2D(pnt1.x(), pnt2.y());
+        pnt2 = Point2D(pnt2.x(), tmp);
       }
+      std::cout << "In constructor " << pnt1 << " " << pnt2 << std::endl;
     }
   }
 
-  // Почему при конструировании через { Point2D(...), Point2D(...) } вызывается
-  // конструктор initializer_list?
-  // Конструирование через initializer_list
   Box2D (std::initializer_list<Point2D> const & lst)
   {
-    std::cout << "Initializer list ctcr" << std::endl;
+    std::cout << "Initializer list ctor" << std::endl;
     Point2D * vals[] = { &pnt1, &pnt2 };
     int const count = sizeof(vals) / sizeof(vals[0]);
 
     auto it = lst.begin();
     for (int i=0; i < count && it != lst.end(); i++, ++it)
       *vals[i] = *it;
-    // Обработка обратных точек
-    //if (pnt1 > pnt2) { vals[0] = &pnt2; vals[1] = &pnt1; }
-    // Конец
+    if (pnt1.x() == pnt2.x() || pnt1.y() == pnt2.y())
+    {
+      std::cout << "Some coordinates are the same for both points, points are being switched to default values"
+                << std::endl;
+      pnt1 = pnt2 = Point2D();
+    }
+    else
+    {
+      // Обработка обратных точек
+      bool x = pnt1.x() > pnt2.x();
+      bool y = pnt1.y() > pnt2.y();
+      if (x && y)
+      {
+        Point2D tmp = pnt1;
+        pnt1 = Point2D(pnt2.x(), pnt2.y());
+        pnt2 = tmp;
+      }
+      else if (x)
+      {
+//        pnt1 = Point2D(pnt2.x(), pnt1.y());
+//        pnt2 = Point2D(pnt1.x(), pnt2.y());
+        float tmp = pnt1.x();
+        pnt1 = Point2D(pnt2.x(), pnt1.y());
+        pnt2 = Point2D(tmp, pnt2.y());
+      }
+      else if (y)
+      {
+        float tmp = pnt1.y();
+        pnt1 = Point2D(pnt1.x(), pnt2.y());
+        pnt2 = Point2D(pnt2.x(), tmp);
+      }
+      std::cout << "In constructor " << pnt1 << " " << pnt2 << std::endl;
+    }
   }
 
   // Конструктор копирования
@@ -150,7 +182,11 @@ public:
 
   Box2D & operator *= (float scale)
   {
-    return *this * scale;
+    float length_x = pnt2.x() - pnt1.x();
+    float length_y = pnt2.y() - pnt1.y();
+    pnt1 = Point2D(pnt1.x() - length_x * (scale - 1) / 2.0f, pnt1.y() - length_y * (scale - 1) / 2.0f);
+    pnt2 = Point2D(pnt2.x() + length_x * (scale - 1) / 2.0f, pnt2.y() + length_y * (scale - 1) / 2.0f);
+    return *this;
   }
 
   // Оператор уменьшения
@@ -160,14 +196,20 @@ public:
     if (scale < kEps) { std::cout << "Box scale err = div by zero or by negative float" << std::endl; return *this; }
     float length_x = pnt2.x() - pnt1.x();
     float length_y = pnt2.y() - pnt1.y();
-    pnt1 = Point2D(pnt1.x() + length_x * (scale - 1) / 2.0f, pnt1.y() + length_y * (scale - 1) / 2.0f);
-    pnt2 = Point2D(pnt2.x() - length_x * (scale - 1) / 2.0f, pnt2.y() - length_y * (scale - 1) / 2.0f);
+    pnt1 = Point2D(pnt1.x() + length_x * (1.0f - 1.0f / scale) / 2.0f, pnt1.y() + length_y * (1.0f - 1.0f / scale) / 2.0f);
+    pnt2 = Point2D(pnt2.x() - length_x * (1.0f - 1.0f / scale) / 2.0f, pnt2.y() - length_y * (1.0f - 1.0f / scale) / 2.0f);
     return *this;
   }
 
   Box2D & operator /= (float scale)
   {
-    return *this / scale;
+    // Деление на ноль
+    if (scale < kEps) { std::cout << "Box scale err = div by zero or by negative float" << std::endl; return *this; }
+    float length_x = pnt2.x() - pnt1.x();
+    float length_y = pnt2.y() - pnt1.y();
+    pnt1 = Point2D(pnt1.x() + length_x * (1.0f - 1.0f / scale) / 2.0f, pnt1.y() + length_y * (1.0f - 1.0f / scale) / 2.0f);
+    pnt2 = Point2D(pnt2.x() - length_x * (1.0f - 1.0f / scale) / 2.0f, pnt2.y() - length_y * (1.0f - 1.0f / scale) / 2.0f);
+    return *this;
   }
 
   Point2D * GetAllPoints() const
@@ -177,17 +219,18 @@ public:
   }
 
   // Метод проверки пересечения
-  bool IsBoxIntersectingBox(const Box2D &b)
+  bool IsBoxIntersectingBox(const Box2D &b) const
   {
-    if (p2().x() < b.p1().x()) return false; // to the left
-    if (p1().x() > b.p2().x()) return false; // to the right
-    if (p1().y() > b.p2().y()) return false; // above
-    if (p2().y() < b.p1().y()) return false; // below
+    if (p2().x() < b.p1().x()) return false;
+    if (p1().x() > b.p2().x()) return false;
+    if (p1().y() > b.p2().y()) return false;
+    if (p2().y() < b.p1().y()) return false;
     return true; // boxes overlap
   }
 
   // Нахождение центра
-  Point2D const GetCenter() {
+  Point2D GetCenter() const
+  {
     return Point2D( (pnt1.x() + pnt2.x())/ 2.0f, (pnt1.y() + pnt2.y())/ 2.0f);
   }
 

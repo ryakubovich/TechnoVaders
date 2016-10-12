@@ -19,8 +19,13 @@ TEST(box2d_test, test_construction)
   EXPECT_EQ(box3, Box2D(Point2D(1.0f, 3.0f), Point2D(5.0f, 6.0f)));
 
   //To Do: Проверка создания прямоугольника с обратным порядком точек
-  box2 = { Point2D(4.0f, 5.0f), Point2D(3.0f, 1.0f) };
-  std::cout << "In test " << box2.p1() << " " << box2.p2() << std::endl;
+  Point2D p1 = { 4.0f, 5.0f };
+  Point2D p2 = { 3.0f, 1.0f } ;
+  box2 = Box2D(p1, p2);
+//  box3 = Box2D(p1, p2);
+//  std::cout << "Point 1 " << p1 << " Point " << p2 << std::endl;
+//  std::cout << "In test " << box2.p1() << " " << box2.p2() << std::endl;
+//  std::cout << "In test " << box3.p1() << " " << box3.p2() << std::endl;
   EXPECT_EQ(box2, Box2D(Point2D(3.0f, 1.0f), Point2D(4.0f, 5.0f)));
 }
 
@@ -52,12 +57,16 @@ TEST(box2d_test, test_intersection)
 
   //Проверка пересечения прямоугольников после масштабирования (уменьшение)
   Box2D box3 = {Point2D(6.0f, 2.0f), Point2D(8.0f, 10.0f)};
-  EXPECT_EQ(box3.IsBoxIntersectingBox(Box2D(0.0f, 0.0f, 8.0f, 3.0f)), true);
-  box3 /= 2.0f;
-  EXPECT_EQ(box3.IsBoxIntersectingBox(Box2D(0.0f, 0.0f, 8.0f, 3.0f)), false);
+  Box2D box4 = Box2D(0.0f, 0.0f, 8.0f, 3.0f);
+  std::cout << "Initial coords: " << box3.p1() << " " << box3.p2() << std::endl;
+  EXPECT_EQ(box3.IsBoxIntersectingBox(box4), true);
+  box3 /= 3.0f;
+  std::cout << "Coords after zooming out: " << box3.p1() << " " << box3.p2() << std::endl;
+  EXPECT_EQ(box3.IsBoxIntersectingBox(box4), false);
 
-  //Проверка пересечения прямоугольников после масштабирования (уменьшения)
-  box3 *= 2.0f;
-  EXPECT_EQ(box3.IsBoxIntersectingBox(Box2D(0.0f, 0.0f, 8.0f, 3.0f)), true);
+  //Проверка пересечения прямоугольников после масштабирования (увеличение)
+  box3 *= 3.0f;
+  std::cout << "Coords after zooming in: " << box3.p1() << " " << box3.p2() << std::endl;
+  EXPECT_EQ(box3.IsBoxIntersectingBox(box4), true);
 
 }
