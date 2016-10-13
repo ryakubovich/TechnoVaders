@@ -3,248 +3,186 @@
 #include <initializer_list>
 #include "point2d.hpp"
 
-//float const kEps=1e-5;
-
 class Box2D
 {
 public:
-  // Конструктор по умолчанию
+  // Default constructor
   Box2D() = default;
 
+  // Constructor of two Point2D objects
   Box2D(Point2D const & obj1, Point2D const & obj2)
-    : pnt1(obj1), pnt2(obj2)
+    : m_min(obj1), m_max(obj2)
   {
-    if (pnt1.x() == pnt2.x() || pnt1.y() == pnt2.y())
-    {
-      std::cout << "Some coordinates are the same for both points, points are being switched to default values"
-                << std::endl;
-      pnt1 = pnt2 = Point2D();
-    }
-    else
-    {
-      // Обработка обратных точек
-      bool x = pnt1.x() > pnt2.x();
-      bool y = pnt1.y() > pnt2.y();
-      if (x && y)
-      {
-        Point2D tmp = pnt1;
-        pnt1 = Point2D(pnt2.x(), pnt2.y());
-        pnt2 = tmp;
-      }
-      else if (x)
-      {
-        float tmp = pnt1.x();
-        pnt1 = Point2D(pnt2.x(), pnt1.y());
-        pnt2 = Point2D(tmp, pnt2.y());
-      }
-      else if (y)
-      {
-        float tmp = pnt1.y();
-        pnt1 = Point2D(pnt1.x(), pnt2.y());
-        pnt2 = Point2D(pnt2.x(), tmp);
-      }
-      std::cout << "Initial arguments " << obj1 << " " << obj2 << std::endl;
-      std::cout << "In constructor " << pnt1 << " " << pnt2 << std::endl;
-    }
+    WrongOrderFix();
   }
 
-  // Конструктор с параметрами - координаты точек
+  // Constructor of four float coordinates
   Box2D(float x_1, float y_1, float x_2, float y_2)
-    : pnt1(Point2D(x_1, y_1)), pnt2(Point2D(x_2, y_2))
+    : m_min(Point2D(x_1, y_1)), m_max(Point2D(x_2, y_2))
   {
-    if (pnt1.x() == pnt2.x() || pnt1.y() == pnt2.y())
-    {
-      std::cout << "Some coordinates are the same for both points, points are being switched to default values"
-                << std::endl;
-      pnt1 = pnt2 = Point2D();
-    }
-    else
-    {
-      // Обработка обратных точек
-      bool x = pnt1.x() > pnt2.x();
-      bool y = pnt1.y() > pnt2.y();
-      if (x && y)
-      {
-        Point2D tmp = pnt1;
-        pnt1 = Point2D(pnt2.x(), pnt2.y());
-        pnt2 = tmp;
-      }
-      else if (x)
-      {
-        float tmp = pnt1.x();
-        pnt1 = Point2D(pnt2.x(), pnt1.y());
-        pnt2 = Point2D(tmp, pnt2.y());
-      }
-      else if (y)
-      {
-        float tmp = pnt1.y();
-        pnt1 = Point2D(pnt1.x(), pnt2.y());
-        pnt2 = Point2D(pnt2.x(), tmp);
-      }
-      std::cout << "In constructor " << pnt1 << " " << pnt2 << std::endl;
-    }
+    WrongOrderFix();
   }
 
+  // Constructor of many Point2D objects
   Box2D (std::initializer_list<Point2D> const & lst)
   {
     std::cout << "Initializer list ctor" << std::endl;
-    Point2D * vals[] = { &pnt1, &pnt2 };
+    Point2D * vals[] = { &m_min, &m_max };
     int const count = sizeof(vals) / sizeof(vals[0]);
 
     auto it = lst.begin();
     for (int i=0; i < count && it != lst.end(); i++, ++it)
       *vals[i] = *it;
-    if (pnt1.x() == pnt2.x() || pnt1.y() == pnt2.y())
-    {
-      std::cout << "Some coordinates are the same for both points, points are being switched to default values"
-                << std::endl;
-      pnt1 = pnt2 = Point2D();
-    }
-    else
-    {
-      // Обработка обратных точек
-      bool x = pnt1.x() > pnt2.x();
-      bool y = pnt1.y() > pnt2.y();
-      if (x && y)
-      {
-        Point2D tmp = pnt1;
-        pnt1 = Point2D(pnt2.x(), pnt2.y());
-        pnt2 = tmp;
-      }
-      else if (x)
-      {
-//        pnt1 = Point2D(pnt2.x(), pnt1.y());
-//        pnt2 = Point2D(pnt1.x(), pnt2.y());
-        float tmp = pnt1.x();
-        pnt1 = Point2D(pnt2.x(), pnt1.y());
-        pnt2 = Point2D(tmp, pnt2.y());
-      }
-      else if (y)
-      {
-        float tmp = pnt1.y();
-        pnt1 = Point2D(pnt1.x(), pnt2.y());
-        pnt2 = Point2D(pnt2.x(), tmp);
-      }
-      std::cout << "In constructor " << pnt1 << " " << pnt2 << std::endl;
-    }
+    WrongOrderFix();
   }
 
-  // Конструктор копирования
+  // Copy semantics
+  // Copy constructor
   Box2D(Box2D const & obj)
-    :pnt1(obj.pnt1), pnt2(obj.pnt2)
+    :m_min(obj.m_min), m_max(obj.m_max)
   {}
 
-  // Оператор присваивания.
+  // Assignment operator
   Box2D & operator = (Box2D const & obj)
   {
     if (this == &obj) return *this;
-    pnt1 = obj.p1();
-    pnt2 = obj.p2();
+    m_min = obj.GetMin();
+    m_max = obj.GetMax();
     return *this;
   }
 
   // Move semantics
   Box2D(Box2D && obj)
-    : pnt1(std::move(obj.pnt1)), pnt2(std::move(obj.pnt2)) {}
+    : m_min(std::move(obj.m_min)), m_max(std::move(obj.m_max)) {}
 
   Box2D & operator = (Box2D && obj)
   {
-    pnt1 = std::move(obj.pnt1);
-    pnt2 = std::move(obj.pnt2);
+    m_min = std::move(obj.m_min);
+    m_max = std::move(obj.m_max);
     return *this;
   }
 
-  // Оператор логического равенства.
+  // Logical equality operator
   bool operator == (Box2D const & obj) const
   {
-    bool p1x = EqualWithEps(p1().x(), obj.p1().x());
-    bool p1y = EqualWithEps(p1().y(), obj.p1().y());
-    bool p2x = EqualWithEps(p2().x(), obj.p2().x());
-    bool p2y = EqualWithEps(p2().y(), obj.p2().y());
+    bool p1x = EqualWithEps(GetMin().x(), obj.GetMin().x());
+    bool p1y = EqualWithEps(GetMin().y(), obj.GetMin().y());
+    bool p2x = EqualWithEps(GetMax().x(), obj.GetMax().x());
+    bool p2y = EqualWithEps(GetMax().y(), obj.GetMax().y());
     return p1x && p1y && p2x && p2y;
   }
 
-  // Оператор логического неравенства.
+  // Logical inequality operator
   bool operator != (Box2D const & obj) const
   {
     return !operator==(obj);
   }
 
-  // Оператор увеличения
+  // Scaling up operator
   Box2D & operator * (float scale)
   {
-    float length_x = pnt2.x() - pnt1.x();
-    float length_y = pnt2.y() - pnt1.y();
-    pnt1 = Point2D(pnt1.x() - length_x * (scale - 1) / 2.0f, pnt1.y() - length_y * (scale - 1) / 2.0f);
-    pnt2 = Point2D(pnt2.x() + length_x * (scale - 1) / 2.0f, pnt2.y() + length_y * (scale - 1) / 2.0f);
+    float length_x = m_max.x() - m_min.x();
+    float length_y = m_max.y() - m_min.y();
+    m_min = Point2D(m_min.x() - length_x * (scale - 1) / 2.0f, m_min.y() - length_y * (scale - 1) / 2.0f);
+    m_max = Point2D(m_max.x() + length_x * (scale - 1) / 2.0f, m_max.y() + length_y * (scale - 1) / 2.0f);
     return *this;
   }
 
   Box2D & operator *= (float scale)
   {
-    float length_x = pnt2.x() - pnt1.x();
-    float length_y = pnt2.y() - pnt1.y();
-    pnt1 = Point2D(pnt1.x() - length_x * (scale - 1) / 2.0f, pnt1.y() - length_y * (scale - 1) / 2.0f);
-    pnt2 = Point2D(pnt2.x() + length_x * (scale - 1) / 2.0f, pnt2.y() + length_y * (scale - 1) / 2.0f);
+    float length_x = m_max.x() - m_min.x();
+    float length_y = m_max.y() - m_min.y();
+    m_min = Point2D(m_min.x() - length_x * (scale - 1) / 2.0f, m_min.y() - length_y * (scale - 1) / 2.0f);
+    m_max = Point2D(m_max.x() + length_x * (scale - 1) / 2.0f, m_max.y() + length_y * (scale - 1) / 2.0f);
     return *this;
   }
 
-  // Оператор уменьшения
+  // Scaling down operator
   Box2D & operator / (float scale)
   {
-    // Деление на ноль
-    if (scale < kEps) { std::cout << "Box scale err = div by zero or by negative float" << std::endl; return *this; }
-    float length_x = pnt2.x() - pnt1.x();
-    float length_y = pnt2.y() - pnt1.y();
-    pnt1 = Point2D(pnt1.x() + length_x * (1.0f - 1.0f / scale) / 2.0f, pnt1.y() + length_y * (1.0f - 1.0f / scale) / 2.0f);
-    pnt2 = Point2D(pnt2.x() - length_x * (1.0f - 1.0f / scale) / 2.0f, pnt2.y() - length_y * (1.0f - 1.0f / scale) / 2.0f);
+    // Checks for division by zero or negative number
+    if (scale < kEps) { std::cout << "Box scale err: div by zero or by negative float" << std::endl; return *this; }
+    float length_x = m_max.x() - m_min.x();
+    float length_y = m_max.y() - m_min.y();
+    m_min = Point2D(m_min.x() + length_x * (1.0f - 1.0f / scale) / 2.0f, m_min.y() + length_y * (1.0f - 1.0f / scale) / 2.0f);
+    m_max = Point2D(m_max.x() - length_x * (1.0f - 1.0f / scale) / 2.0f, m_max.y() - length_y * (1.0f - 1.0f / scale) / 2.0f);
     return *this;
   }
 
   Box2D & operator /= (float scale)
   {
-    // Деление на ноль
-    if (scale < kEps) { std::cout << "Box scale err = div by zero or by negative float" << std::endl; return *this; }
-    float length_x = pnt2.x() - pnt1.x();
-    float length_y = pnt2.y() - pnt1.y();
-    pnt1 = Point2D(pnt1.x() + length_x * (1.0f - 1.0f / scale) / 2.0f, pnt1.y() + length_y * (1.0f - 1.0f / scale) / 2.0f);
-    pnt2 = Point2D(pnt2.x() - length_x * (1.0f - 1.0f / scale) / 2.0f, pnt2.y() - length_y * (1.0f - 1.0f / scale) / 2.0f);
+    // Checks of division by zero or negative number
+    if (scale < kEps) { std::cout << "Box scale err: div by zero or by negative float" << std::endl; return *this; }
+    float length_x = m_max.x() - m_min.x();
+    float length_y = m_max.y() - m_min.y();
+    m_min = Point2D(m_min.x() + length_x * (1.0f - 1.0f / scale) / 2.0f, m_min.y() + length_y * (1.0f - 1.0f / scale) / 2.0f);
+    m_max = Point2D(m_max.x() - length_x * (1.0f - 1.0f / scale) / 2.0f, m_max.y() - length_y * (1.0f - 1.0f / scale) / 2.0f);
     return *this;
   }
 
+  // Return all box points in Point2D* type
   Point2D * GetAllPoints() const
   {
-    Point2D * pointsArray = new Point2D[4]{pnt1, Point2D(pnt1.x(), pnt2.y()), Point2D(pnt2.x(), pnt1.y()), pnt2};
+    Point2D * pointsArray = new Point2D[4]{m_min, Point2D(m_min.x(), m_max.y()), Point2D(m_max.x(), m_min.y()), m_max};
     return pointsArray;
   }
 
-  // Метод проверки пересечения
-  bool IsBoxIntersectingBox(const Box2D &b) const
+  // Method checks whether boxes intersect each other or not
+  bool IsBoxIntersectingBox(Box2D const & b) const
   {
-    if (p2().x() < b.p1().x()) return false;
-    if (p1().x() > b.p2().x()) return false;
-    if (p1().y() > b.p2().y()) return false;
-    if (p2().y() < b.p1().y()) return false;
-    return true; // boxes overlap
+    if (GetMax().x() < b.GetMin().x()) return false;
+    if (GetMin().x() > b.GetMax().x()) return false;
+    if (GetMin().y() > b.GetMax().y()) return false;
+    if (GetMax().y() < b.GetMin().y()) return false;
+    return true;
   }
 
-  // Нахождение центра
+  // Return box center
   Point2D GetCenter() const
   {
-    return Point2D( (pnt1.x() + pnt2.x())/ 2.0f, (pnt1.y() + pnt2.y())/ 2.0f);
+    return Point2D((m_min.x() + m_max.x())/ 2.0f, (m_min.y() + m_max.y())/ 2.0f);
   }
 
-  Point2D &p1() { return pnt1; }
-  Point2D &p2() { return pnt2; }
-
-  Point2D const& p1() const { return pnt1; }
-  Point2D const& p2() const { return pnt2; }
-
+  Point2D const & GetMin() const { return m_min; }
+  Point2D const & GetMax() const { return m_max; }
 
 private:
-  // Задание пары точек
-  Point2D pnt1 = Point2D(0.0f, 0.0f);
-  Point2D pnt2 = Point2D(0.0f, 0.0f);
+  Point2D m_min = Point2D(0.0f, 0.0f);
+  Point2D m_max = Point2D(0.0f, 0.0f);
+
+  // Method checks whether min point has a smaller x coordinate and a smaller y coordinate than max and fixes it if possible
+  void WrongOrderFix()
+  {
+    if (m_min.x() == m_max.x() || m_min.y() == m_max.y())
+    {
+      std::cout << "Some coordinates are the same for both points, points are being switched to default values"
+                << std::endl;
+      m_min = m_max = Point2D();
+    }
+    else
+    {
+      bool x = m_min.x() > m_max.x();
+      bool y = m_min.y() > m_max.y();
+      if (x && y)
+      {
+        Point2D tmp = m_min;
+        m_min = Point2D(m_max.x(), m_max.y());
+        m_max = tmp;
+      }
+      else if (x)
+      {
+        float tmp = m_min.x();
+        m_min = Point2D(m_max.x(), m_min.y());
+        m_max = Point2D(tmp, m_max.y());
+      }
+      else if (y)
+      {
+        float tmp = m_min.y();
+        m_min = Point2D(m_min.x(), m_max.y());
+        m_max = Point2D(m_max.x(), tmp);
+      }
+    }
+  }
 
   bool EqualWithEps(float v1, float v2) const
   {
