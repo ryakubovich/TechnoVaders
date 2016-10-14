@@ -32,7 +32,6 @@ TEST(ray2d_test, test_contruction)
   Ray2D r4 = std::move(r2);
   v1 = { 2.0f, 0.0f };
   v1.Normalize();
-  std::cout << r2.GetDirection().x() << " " << r2.GetDirection().y() << std::endl;
   EXPECT_EQ(r4.GetOrigin(), Point2D(5.0f, 5.0f));
   EXPECT_EQ(r4.GetDirection(), v1);
   EXPECT_EQ(r2.GetOrigin(), Point2D(0.0f, 0.0f));

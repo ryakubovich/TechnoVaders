@@ -26,7 +26,6 @@ public:
   // Constructor of many Point2D objects
   Box2D (std::initializer_list<Point2D> const & lst)
   {
-    std::cout << "Initializer list ctor" << std::endl;
     Point2D * vals[] = { &m_min, &m_max };
     int const count = sizeof(vals) / sizeof(vals[0]);
 

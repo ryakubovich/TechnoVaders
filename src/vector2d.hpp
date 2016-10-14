@@ -12,12 +12,11 @@ public:
   Vector2D() = default;
 
   // Constructor of two float coordinates
-  Vector2D(float x, float y) : m_x(x), m_y(y) { std::cout << "2-float ctor" << std::endl; }
+  Vector2D(float x, float y) : m_x(x), m_y(y) {}
 
   // Constructor of many float coordinates
   Vector2D(std::initializer_list<float> const & lst)
   {
-    std::cout << "Initializer list ctor" << std::endl;
     float * vals[] = { &m_x, &m_y };
     int count = sizeof(vals) / sizeof(vals[0]);
     auto it = lst.begin();
