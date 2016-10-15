@@ -2,6 +2,7 @@
 
 #include <initializer_list>
 #include "point2d.hpp"
+#include <memory>
 
 class Box2D
 {
@@ -17,8 +18,8 @@ public:
   }
 
   // Constructor of four float coordinates
-  Box2D(float x_1, float y_1, float x_2, float y_2)
-    : m_min(Point2D(x_1, y_1)), m_max(Point2D(x_2, y_2))
+  Box2D(float x1, float y1, float x2, float y2)
+    : m_min(Point2D(x1, y1)), m_max(Point2D(x2, y2))
   {
     WrongOrderFix();
   }
@@ -28,7 +29,6 @@ public:
   {
     Point2D * vals[] = { &m_min, &m_max };
     int const count = sizeof(vals) / sizeof(vals[0]);
-
     auto it = lst.begin();
     for (int i=0; i < count && it != lst.end(); i++, ++it)
       *vals[i] = *it;
@@ -38,7 +38,7 @@ public:
   // Copy semantics
   // Copy constructor
   Box2D(Box2D const & obj)
-    :m_min(obj.m_min), m_max(obj.m_max)
+    : m_min(obj.m_min), m_max(obj.m_max)
   {}
 
   // Assignment operator
@@ -64,11 +64,10 @@ public:
   // Logical equality operator
   bool operator == (Box2D const & obj) const
   {
-    bool p1x = EqualWithEps(GetMin().x(), obj.GetMin().x());
-    bool p1y = EqualWithEps(GetMin().y(), obj.GetMin().y());
-    bool p2x = EqualWithEps(GetMax().x(), obj.GetMax().x());
-    bool p2y = EqualWithEps(GetMax().y(), obj.GetMax().y());
-    return p1x && p1y && p2x && p2y;
+    return EqualWithEps(GetMin().x(), obj.GetMin().x()) &&
+        EqualWithEps(GetMin().y(), obj.GetMin().y()) &&
+        EqualWithEps(GetMax().x(), obj.GetMax().x()) &&
+        EqualWithEps(GetMax().y(), obj.GetMax().y());
   }
 
   // Logical inequality operator
@@ -100,7 +99,11 @@ public:
   Box2D & operator / (float scale)
   {
     // Checks for division by zero or negative number
-    if (scale < kEps) { std::cout << "Box scale err: div by zero or by negative float" << std::endl; return *this; }
+    if (scale < kEps)
+    {
+      std::cout << "Box scale err: div by zero or by negative float" << std::endl;
+      return *this;
+    }
     float length_x = m_max.x() - m_min.x();
     float length_y = m_max.y() - m_min.y();
     m_min = Point2D(m_min.x() + length_x * (1.0f - 1.0f / scale) / 2.0f, m_min.y() + length_y * (1.0f - 1.0f / scale) / 2.0f);
@@ -111,7 +114,11 @@ public:
   Box2D & operator /= (float scale)
   {
     // Checks of division by zero or negative number
-    if (scale < kEps) { std::cout << "Box scale err: div by zero or by negative float" << std::endl; return *this; }
+    if (scale < kEps)
+    {
+      std::cout << "Box scale err: div by zero or by negative float" << std::endl;
+      return *this;
+    }
     float length_x = m_max.x() - m_min.x();
     float length_y = m_max.y() - m_min.y();
     m_min = Point2D(m_min.x() + length_x * (1.0f - 1.0f / scale) / 2.0f, m_min.y() + length_y * (1.0f - 1.0f / scale) / 2.0f);
@@ -119,11 +126,10 @@ public:
     return *this;
   }
 
-  // Return all box points in Point2D* type
-  Point2D * GetAllPoints() const
+  // Return all box points in std::unique_ptr<Point2D[]> type
+  std::unique_ptr<Point2D[]> GetAllPoints() const
   {
-    Point2D * pointsArray = new Point2D[4]{m_min, Point2D(m_min.x(), m_max.y()), Point2D(m_max.x(), m_min.y()), m_max};
-    return pointsArray;
+    return std::unique_ptr<Point2D[]>(new Point2D[4]{m_min, Point2D(m_min.x(), m_max.y()), Point2D(m_max.x(), m_min.y()), m_max});
   }
 
   // Method checks whether boxes intersect each other or not
@@ -139,7 +145,7 @@ public:
   // Return box center
   Point2D GetCenter() const
   {
-    return Point2D((m_min.x() + m_max.x())/ 2.0f, (m_min.y() + m_max.y())/ 2.0f);
+    return Point2D((m_min.x() + m_max.x()) / 2.0f, (m_min.y() + m_max.y()) / 2.0f);
   }
 
   Point2D const & GetMin() const { return m_min; }
@@ -160,26 +166,12 @@ private:
     }
     else
     {
-      bool x = m_min.x() > m_max.x();
-      bool y = m_min.y() > m_max.y();
-      if (x && y)
-      {
-        Point2D tmp = m_min;
-        m_min = Point2D(m_max.x(), m_max.y());
-        m_max = tmp;
-      }
-      else if (x)
-      {
-        float tmp = m_min.x();
-        m_min = Point2D(m_max.x(), m_min.y());
-        m_max = Point2D(tmp, m_max.y());
-      }
-      else if (y)
-      {
-        float tmp = m_min.y();
-        m_min = Point2D(m_min.x(), m_max.y());
-        m_max = Point2D(m_max.x(), tmp);
-      }
+      Point2D p1 = m_min;
+      Point2D p2 = m_max;
+      m_min.x() = std::min(p1.x(), p2.x());
+      m_min.y() = std::min(p1.y(), p2.y());
+      m_max.x() = std::max(p1.x(), p2.x());
+      m_max.y() = std::max(p1.y(), p2.y());
     }
   }
 

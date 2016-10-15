@@ -33,7 +33,7 @@ public:
 
   // Move semantics
   Point2D(Point2D && obj)
-    : m_x(obj.m_x), m_y(obj.m_y) { obj.m_x = 0; obj.m_y = 0; }
+    : m_x(obj.m_x), m_y(obj.m_y) { obj.m_x = obj.m_y = 0; }
 
   Point2D & operator = (Point2D && obj)
   {
@@ -156,11 +156,47 @@ public:
     }
   };
 
+  static float CalculateAngle(Point2D const & vector1, Point2D const & vector2)
+  {
+    float scalarProduct = vector1.Scalar(vector2);
+    float determinant = vector1.Determinant(vector2);
+    float angle = atan2(determinant, scalarProduct);
+    return angle < 0 ? 2 * M_PI + angle : angle;
+  }
+
+  // Nethod normalizes (length = 1) the vector (point) by dividing its coordinates by its length
+  void Normalize()
+  {
+    float length = Length();
+    if (!EqualWithEps(0.0f, length))
+    {
+      m_x /= length;
+      m_y /= length;
+    }
+  }
+
+  // Method returns scalar product of two vectors
+  float Scalar(Point2D const & vec) const
+  {
+    return m_x * vec.m_x + m_y * vec.m_y;
+  }
+
+  // Method returns determinant of two vectors matrix
+  float Determinant(Point2D const & vec) const
+  {
+    return m_x * vec.m_y - m_y * vec.m_x;
+  }
+
 private:
 
   bool EqualWithEps(float v1, float v2) const
   {
     return fabs(v1 - v2) < kEps;
+  }
+
+  float Length() const
+  {
+    return sqrt(m_x * m_x + m_y * m_y);
   }
 
   float m_x = 0.0f, m_y = 0.0f;

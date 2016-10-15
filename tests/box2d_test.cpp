@@ -59,3 +59,4 @@ TEST(box2d_test, test_intersection)
   box3 *= 3.0f;
   EXPECT_EQ(box3.IsBoxIntersectingBox(box4), true);
 }
+
