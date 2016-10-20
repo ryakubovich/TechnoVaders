@@ -18,6 +18,18 @@ TEST(point2d_test, test_construction)
   // Тест на создание копии объекта.
   Point2D p3 = p2;
   EXPECT_EQ(p3, p2);
+
+  p3 = std::move(p1);
+  EXPECT_EQ(p3.x(), 0.0f);
+  EXPECT_EQ(p3.y(), 0.0f);
+  EXPECT_EQ(p1.x(), 1.2f);
+  EXPECT_EQ(p1.y(), 2.4f);
+
+  Point2D p5 = std::move(p2);
+  EXPECT_EQ(p5.x(), 1.2f);
+  EXPECT_EQ(p5.y(), 2.4f);
+  EXPECT_EQ(p2.x(), 0.0f);
+  EXPECT_EQ(p2.y(), 0.0f);
 }
 
 TEST(point2d_test, test_initializer_list)
@@ -96,6 +108,19 @@ TEST(point2d_test, test_hash)
 TEST(point2d_test, test_output)
 {
   std::stringstream s;
-s << Point2D(1.2f, 0.2f);
+  s << Point2D(1.2f, 0.2f);
   EXPECT_EQ(s.str(), "Point2D {1.2, 0.2}");
+}
+
+TEST(point2d_test, test_vector_operations)
+{
+  // Checks for vector operations such as normalizing, calculating scalar product and determinant
+  Point2D v1 = { 2.0f, 0.0f };
+  v1.Normalize();
+  EXPECT_EQ(v1, Point2D(1.0f, 0.0f));
+
+  Point2D v2 = { 0.0f, 1.0f };
+  Point2D v3 = { 1.0f, 0.0f };
+  EXPECT_EQ(v2.Scalar(v3), 0.0f);
+  EXPECT_EQ(v2.Determinant(v3), -1.0f);
 }
