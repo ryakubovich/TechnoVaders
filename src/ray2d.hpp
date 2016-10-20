@@ -57,31 +57,28 @@ public:
   // Method uses technique of defining "vision scope" within which a ray intersects a box and checks if the ray direction is within this scope
   bool IsRayIntersectingBox(Box2D box)
   {
-    Point2D * xAxis = new Point2D(1.0f, 0.0f);
-    Point2D * directionToOrigin = new Point2D(m_origin.x(), m_origin.y());
+    Point2D xAxis(1.0f, 0.0f);
+    Point2D directionToOrigin(m_origin.x(), m_origin.y());
     std::unique_ptr<Point2D[]> allBoxPoints = box.GetAllPoints();
     float minAngle = 2.0f * M_PI + 1;
     float maxAngle = -1.0f;
     float angle;
-    Point2D * directionToPoint;
+    Point2D directionToPoint;
     Point2D directionFromOriginToPoint;
 
     for (int i = 0; i < 4; i++)
     {
-      directionToPoint = new Point2D(allBoxPoints[i].x(), allBoxPoints[i].y());
-      directionFromOriginToPoint = *directionToPoint - *directionToOrigin;
+      directionToPoint = Point2D(allBoxPoints[i].x(), allBoxPoints[i].y());
+      directionFromOriginToPoint = directionToPoint - directionToOrigin;
       directionFromOriginToPoint.Normalize();
 
-      angle = Point2D::CalculateAngle(*xAxis, directionFromOriginToPoint);
+      angle = Point2D::CalculateAngle(xAxis, directionFromOriginToPoint);
 
       if (angle < minAngle) minAngle = angle;
       if (angle > maxAngle) maxAngle = angle;
-      delete directionToPoint;
     }
 
-    angle = Point2D::CalculateAngle(*xAxis, m_direction);
-    delete directionToOrigin;
-    delete xAxis;
+    angle = Point2D::CalculateAngle(xAxis, m_direction);
 
     if (maxAngle - minAngle > M_PI) return angle >= maxAngle || angle <= minAngle;
     else return angle <= maxAngle && angle >= minAngle;
