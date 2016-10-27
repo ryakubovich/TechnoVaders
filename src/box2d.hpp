@@ -151,6 +151,9 @@ public:
   Point2D const & GetMin() const { return m_min; }
   Point2D const & GetMax() const { return m_max; }
 
+  void SetMin(Point2D const & point) { m_min = point; }
+  void SetMax(Point2D const & point) { m_max = point; }
+
 private:
   Point2D m_min = Point2D(0.0f, 0.0f);
   Point2D m_max = Point2D(0.0f, 0.0f);
