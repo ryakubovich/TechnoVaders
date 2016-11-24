@@ -3,14 +3,14 @@
 #include "gameentity.hpp"
 #include <list>
 
-class Bullet : GameEntity
+class Bullet : public GameEntity
 {
 public:
-  Bullet(box)
+  Bullet(Box2D box)
     : GameEntity(box)
   {}
 
-  Bullet(box, velocity, power, direction)
+  Bullet(Box2D box, float velocity, float power, Point2D direction)
     : GameEntity(box), m_velocity(velocity), m_power(power), m_direction(direction)
   {}
 
@@ -22,18 +22,7 @@ private:
   Point2D m_direction = { 0.0f, 1.0f };
 };
 
-class Missile : Bullet
-{
-public:
-  Missile(box, velocity, power, direction)
-    : Bullet(box, velocity, power, direction)
-  {}
-
-  void MoveLeft() { GameEntity::Move(Point2D(-1.0f, 0.0f)); }
-  void MoveRight() { GameEntity::Move(Point2D(1.0f, 0.0f)); }
-};
-
-class AmmoManager
+class BulletManager
 {
 public:
   void Update()
@@ -60,15 +49,28 @@ public:
       m_aliensBullets.erase(it);
   }
 
-  void CreateMissile();
-  void DeleteMissile();
+  void CreateMissile(Box2D box)
+  {
+    m_playersMissiles.emplace_back(Bullet(box));
+  }
+
+  void CreateMissile(Box2D box, float velocity, float power, Point2D direction)
+  {
+    m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction));
+  }
+
+  void DeleteMissile(std::list<Bullet>::iterator it)
+  {
+    m_playersMissiles.erase(it);
+  }
 
   std::list<Bullet> const & GetPlayersBullets() const { return m_playersBullets; }
   std::list<Bullet> const & GetAliensBullets() const { return m_aliensBullets; }
-  std::list<Missile> const & GetPlayersMissiles() const { return m_playersMissiles; }
+  std::list<Bullet> const & GetPlayersMissiles() const { return m_playersMissiles; }
 
 private:
+  // Lists are used because of frequent deletion of random-placed bullets
   std::list<Bullet> m_playersBullets;
   std::list<Bullet> m_aliensBullets;
-  std::list<Missile> m_playersMissiles;
+  std::list<Bullet> m_playersMissiles;
 };

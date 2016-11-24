@@ -5,7 +5,7 @@
 class GameEntity
 {
 public:
-  GameEntity(box)
+  GameEntity(Box2D box)
     : m_box(box)
   {}
 
