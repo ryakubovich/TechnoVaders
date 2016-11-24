@@ -1,21 +1,19 @@
 #pragma once
 
 #include "alien.hpp"
-#include "missilelauncher.hpp"
 
-class Player : Alien
+class Player : public Alien
 {
 public:
-  Player(health, gun)
-    : Alien(health, gun)
+  Player(Box2D box, float health, Gun gun)
+    : Alien(box, health, gun)
   {}
 
-  Player(health, gun, lives)
-    : Alien(health, gun), m_lives(lives)
+  Player(Box2D box, float health, Gun gun, int lives)
+    : Alien(box, health, gun), m_lives(lives)
   {}
 
-   void MoveLeft() { GameEntity::Move(Point2D(-1.0f, 0.0f)); }
-   void MoveRight() { GameEntity::Move(Point2D(1.0f, 0.0f)); }
+  void DecLives() { m_lives--; }
 
 private:
   int m_lives = 3;

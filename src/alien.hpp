@@ -3,18 +3,17 @@
 #include "gameentity.hpp"
 #include "gun.hpp"
 
-class Alien : GameEntity
+class Alien : public GameEntity
 {
 public:
-  Alien(box)
-    : GameEntity(box)
+  Alien(Box2D box, Gun gun)
+    : GameEntity(box), m_gun(gun)
   {}
 
-  Alien(box, health, gun)
+  Alien(Box2D box, float health, Gun gun)
     : GameEntity(box), m_health(health), m_gun(gun)
   {}
 
-  void Move() { GameEntity::Move(m_direction * m_velocity); }
   void Shot();
   void Hit();
   
