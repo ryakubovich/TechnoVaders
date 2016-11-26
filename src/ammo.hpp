@@ -15,6 +15,7 @@ public:
   {}
 
   void Move() { GameEntity::Move(m_direction * m_velocity); }
+  float GetPower() { return m_power; }
 
 private:
   float m_velocity = 1;

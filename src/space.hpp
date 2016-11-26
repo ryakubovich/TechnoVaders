@@ -5,10 +5,17 @@
 #include "obstacle.hpp"
 #include "ai.hpp"
 #include "player.hpp"
+#include <functional>
 
 class Space
 {
 public:
+  Space()
+  {
+    m_ai.SetDamageHandler([this](float damage) { m_playerOne.Hit(damage); });
+    m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
+  }
+
   void Update()
   {
     m_bm.Update();
@@ -35,9 +42,7 @@ private:
       {
         if (pit->GetBox().IsBoxIntersectingBox(ait->GetBox()))
         {
-          // Process hit, delete bullet
-          // TO DO: Accumulate missile score
-          ait->Hit();
+          m_ai.Damage(ait, pit->GetPower());
           m_bm.DeleteBullet(true, pit);
           break;
         }
@@ -45,19 +50,20 @@ private:
     auto aliensBullets = m_bm.GetAliensBullets();
     for (auto ait = aliensBullets.begin(); ait != aliensBullets.end(); ++ait)
     {
+      if ((ait->GetBox()).IsBoxIntersectingBox(m_playerOne.GetBox()))
+      {
+        m_playerOne.Damage(ait->GetPower());
+        m_bm.DeleteBullet(false, ait);
+        break;
+      }
       for (auto oit = m_obstacles.begin(); oit != m_obstacles.end(); ++oit)
       {
         if (ait->GetBox().IsBoxIntersectingBox(oit->GetOverallBox()))
         {
-          oit->Hit(ait->GetBox());
+          oit->Damage(ait->GetBox());
           m_bm.DeleteBullet(false, ait);
           break;
         }
-      }
-      if ((ait->GetBox()).IsBoxIntersectingBox(m_playerOne.GetBox()))
-      {
-        m_playerOne.Hit();
-        m_bm.DeleteBullet(false, ait);
       }
     }
   }
