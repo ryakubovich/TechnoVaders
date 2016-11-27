@@ -23,6 +23,6 @@ public:
 
   Box2D const & GetBox() const { return m_box; }
 
-private:
+protected:
   Box2D m_box;
 };

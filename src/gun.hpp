@@ -8,11 +8,19 @@
 class Gun
 {
 public:
-  bool isReloading = false;
+//  Gun(BulletManager & bm) : m_bm(bm) {}
+
+  Gun(std::string name, int holderAmmo, float bulletCaliber, float bulletVelocity, float missileCaliber, float missileVelocity,
+      float limit, BulletManager & bm)
+    : m_name(name), m_ammo(holderAmmo), m_holderAmmo(holderAmmo), m_bulletCaliber(bulletCaliber), m_bulletVelocity(bulletVelocity),
+      m_missileCaliber(missileCaliber), m_missileVelocity(missileVelocity), m_limit(limit), m_bm(bm) {}
+
+  Gun(std::string name, int holderAmmo, float caliber, float velocity, BulletManager & bm)
+    : Gun(name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0, bm) {}
 
   void Shot(GameEntity * shooter)
   {
-    if (!isReloading)
+    if (!m_isReloading)
     {
       m_bm.CreateBullet(shooter->GetBox(), m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, 1.0f));
       if (--m_ammo == 0) Reload();
@@ -21,10 +29,10 @@ public:
 
   void Reload()
   {
-    isReloading = true;
+    m_isReloading = true;
     timer(3000); // 3 seconds
-    isReloading = false;
-//    m_ammo = CONSTANT_FROM_FILE;
+    m_isReloading = false;
+    m_ammo = m_holderAmmo;
   }
 
   void AccumulateScore(float damage) { m_score += damage; }
@@ -40,15 +48,17 @@ public:
 
 private:
   std::string m_name;
-  int m_ammo = 10;
-  float m_bulletCaliber = 1;
+  int m_ammo;
+  int m_holderAmmo;
+  float m_bulletCaliber;
   float m_missileCaliber;
-  int m_shootingpace = 50;
   float m_bulletVelocity;
   float m_missileVelocity;
   float m_limit;
-  float m_score;
-  BulletManager & m_bm;
+  float m_score = 0;
+  bool m_isReloading = false;
+  BulletManager m_false = BulletManager();
+  BulletManager & m_bm = m_false;
 
   void timer(int ms)
   {
@@ -56,4 +66,6 @@ private:
     clock_t end_time = clock() + ms * CLOCKS_PER_MSEC;
     while (clock() < end_time) {}
   }
+
+  int const GetHolderAmmo() const { return m_holderAmmo; }
 };

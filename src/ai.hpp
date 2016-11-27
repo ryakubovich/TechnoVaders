@@ -7,6 +7,9 @@
 class AI
 {
 public:
+  AI(int aliensNumber, float health, std::string name, int holderAmmo, float bulletCaliber, float bullerVelocity, BulletManager & bm)
+  {}
+
   void Update();
   void Shot();
   std::list<Alien> const & GetAliens() const { return m_aliens; }

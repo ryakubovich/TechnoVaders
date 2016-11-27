@@ -1,16 +1,14 @@
 #pragma once
 
 #include "alien.hpp"
+#include <string>
 
 class Player : public Alien
 {
 public:
-  Player(Box2D box, float health, Gun gun)
-    : Alien(box, health, gun)
-  {}
-
-  Player(Box2D box, float health, Gun gun, int lives)
-    : Alien(box, health, gun), m_lives(lives)
+  Player(Box2D box, float health, int lives, std::string name, int holderAmmo, float bulletCaliber, float bulletVelocity,
+         float missileCaliber, float missileVelocity, float limit, BulletManager & bm)
+    : Alien(box, health, name, holderAmmo, bulletCaliber, bulletVelocity, missileCaliber, missileVelocity, limit, bm), m_lives(lives)
   {}
 
   void Hit(float damage)
@@ -31,5 +29,5 @@ public:
 
 private:
   int m_score = 0;
-  int m_lives = 3;
+  int m_lives;
 };

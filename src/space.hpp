@@ -1,20 +1,33 @@
 #pragma once
 
-#include <vector>
+#include <functional>
+#include <fstream>
+#include <list>
+#include "ai.hpp"
 #include "ammo.hpp"
 #include "obstacle.hpp"
-#include "ai.hpp"
 #include "player.hpp"
-#include <functional>
+
+enum InputType
+{
+  Shot,
+  LaunchMissile,
+  MoveLeft,
+  MoveRight,
+  MoveMissileLeft,
+  MoveMissileRight
+};
 
 class Space
 {
 public:
-  Space()
-  {
-    m_ai.SetDamageHandler([this](float damage) { m_playerOne.Hit(damage); });
-    m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
-  }
+  Space(float pHealth, int pLives, std::string pGunName, int pGunHolderAmmo, float pGunBulletCaliber,
+        float pGunBulletVelocity, float pGunMissileCaliber, float pGunMissileVelocity, float pGunLimit,
+        int aNumber, float aHealth, std::string aGunName, int aGunHolderAmmo, float aGunBulletCaliber,
+        float aGunBulletVelocity)
+    : m_playerOne(Box2D(), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
+                  pGunMissileCaliber, pGunMissileVelocity, pGunLimit, m_bm),
+      m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm) {}
 
   void Update()
   {
@@ -24,14 +37,14 @@ public:
     m_ai.Shot();
   }
 
-  void InputProcessing();
+  void InputProcessing(InputType input);
 
 private:
-  Player m_playerOne;
-//  Player m_playerTwo;
-  std::vector<Obstacle> m_obstacles;
   BulletManager m_bm;
   AI m_ai;
+  Player m_playerOne;
+//  Player m_playerTwo;
+  std::list<Obstacle> m_obstacles;
 
   void IntersectionCheck()
   {
