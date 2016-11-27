@@ -5,6 +5,8 @@
 class GameEntity
 {
 public:
+  GameEntity() = default;
+
   GameEntity(Box2D box)
     : m_box(box)
   {}

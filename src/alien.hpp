@@ -14,17 +14,15 @@ public:
     : GameEntity(box), m_health(health), m_gun(gun)
   {}
 
-  void Shot()
-  {
-
-  }
+  void Shot() { m_gun.Shot(this); }
 
   void Damage(float damage)
   {
     m_health -= damage;
   }
+  float GetHealth() const { return m_health; }
   
-private:
+protected:
   float m_health = 100;
   Gun m_gun;
 };

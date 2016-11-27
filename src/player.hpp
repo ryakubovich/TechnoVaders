@@ -15,20 +15,21 @@ public:
 
   void Hit(float damage)
   {
-    m_health -= damage;
-    if (m_health < 0.0)
-    {
-      DecLives();
-    }
+    m_gun.AccumulateScore(damage);
   }
 
   void DecLives() { m_lives--; }
+  void IncScore() { m_score++; }
   void LaunchMissile()
   {
-    CreateMissile();
-    m_limit = 0;
+    if (m_gun.GetScore() >= m_gun.GetLimit()) m_gun.Launch(this);
+    else
+    {
+      // Do something to highlight lack of score
+    }
   }
 
 private:
+  int m_score = 0;
   int m_lives = 3;
 };
