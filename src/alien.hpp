@@ -14,8 +14,15 @@ public:
     : GameEntity(box), m_health(health), m_gun(gun)
   {}
 
-  void Shot();
-  void Hit();
+  void Shot()
+  {
+
+  }
+
+  void Damage(float damage)
+  {
+    m_health -= damage;
+  }
   
 private:
   float m_health = 100;
