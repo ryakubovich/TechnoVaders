@@ -13,7 +13,7 @@ public:
         m_subObstacles.emplace_back(Box2D(Point2D(i, j), Point2D(i + widthSub, j + heightSub)));
   }
 
-  void Hit(Box2D const & hitBox)
+  void Damage(Box2D const & hitBox)
   {
     for (auto it = m_subObstacles.begin(); it != m_subObstacles.end(); ++it)
     {
