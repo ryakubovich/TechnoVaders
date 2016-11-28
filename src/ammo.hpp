@@ -32,15 +32,8 @@ public:
       it->Move();
   }
 
-  void CreateBullet(Box2D box)
-  {
-    m_playersBullets.emplace_back(Bullet(box));
-  }
-
-  void CreateBullet(Box2D box, float velocity, float power, Point2D direction)
-  {
-    m_playersBullets.emplace_back(Bullet(box, velocity, power, direction));
-  }
+  void CreateBullet(Box2D box) { m_playersBullets.emplace_back(Bullet(box)); }
+  void CreateBullet(Box2D box, float velocity, float power, Point2D direction) { m_playersBullets.emplace_back(Bullet(box, velocity, power, direction)); }
 
   void DeleteBullet(bool playersBullet, std::list<Bullet>::iterator it)
   {
@@ -50,27 +43,16 @@ public:
       m_aliensBullets.erase(it);
   }
 
-  void CreateMissile(Box2D box)
-  {
-    m_playersMissiles.emplace_back(Bullet(box));
-  }
-
-  void CreateMissile(Box2D box, float velocity, float power, Point2D direction)
-  {
-    m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction));
-  }
-
-  void DeleteMissile(std::list<Bullet>::iterator it)
-  {
-    m_playersMissiles.erase(it);
-  }
+  void CreateMissile(Box2D box) { m_playersMissiles.emplace_back(Bullet(box)); }
+  void CreateMissile(Box2D box, float velocity, float power, Point2D direction) { m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction)); }
+  void DeleteMissile(std::list<Bullet>::iterator it) { m_playersMissiles.erase(it); }
 
   std::list<Bullet> const & GetPlayersBullets() const { return m_playersBullets; }
   std::list<Bullet> const & GetAliensBullets() const { return m_aliensBullets; }
   std::list<Bullet> const & GetPlayersMissiles() const { return m_playersMissiles; }
 
 private:
-  // Lists are used because of frequent deletion of random-placed bullets
+  // Lists are used because of frequent deletion of randomly placed bullets
   std::list<Bullet> m_playersBullets;
   std::list<Bullet> m_aliensBullets;
   std::list<Bullet> m_playersMissiles;

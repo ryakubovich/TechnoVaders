@@ -11,12 +11,13 @@ public:
     : Alien(box, health, name, holderAmmo, bulletCaliber, bulletVelocity, missileCaliber, missileVelocity, limit, bm), m_lives(lives)
   {}
 
-  void Hit(float damage)
+  void Hit(float damage) { m_gun.AccumulateScore(damage); }
+  void Damage(float damage)
   {
-    m_gun.AccumulateScore(damage);
+    Alien::Damage(damage);
+    if (m_health <= 0) DecLives();
   }
 
-  void DecLives() { m_lives--; }
   void IncScore() { m_score++; }
   void LaunchMissile()
   {
@@ -27,7 +28,17 @@ public:
     }
   }
 
+  using TOnNoLivesHandler = std::function<void()>;
+  void SetNoLivesHandler(TOnNoLivesHandler handler) { m_noLivesHandler = handler; }
+
 private:
   int m_score = 0;
   int m_lives;
+  TOnNoLivesHandler m_noLivesHandler;
+
+  void DecLives()
+  {
+      m_lives--;
+      if (m_lives < 0) m_noLivesHandler();
+  }
 };

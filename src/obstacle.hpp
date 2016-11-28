@@ -1,7 +1,7 @@
 #pragma once
 
 #include "box2d.hpp"
-#include <vector>
+#include <list>
 
 class Obstacle
 {
@@ -36,5 +36,5 @@ public:
   }
 
 private:
-  std::vector<Box2D> m_subObstacles;
+  std::list<Box2D> m_subObstacles;
 };

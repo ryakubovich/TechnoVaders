@@ -8,13 +8,13 @@
 class Gun
 {
 public:
-//  Gun(BulletManager & bm) : m_bm(bm) {}
-
+  // Constructor for players
   Gun(std::string name, int holderAmmo, float bulletCaliber, float bulletVelocity, float missileCaliber, float missileVelocity,
       float limit, BulletManager & bm)
     : m_name(name), m_ammo(holderAmmo), m_holderAmmo(holderAmmo), m_bulletCaliber(bulletCaliber), m_bulletVelocity(bulletVelocity),
       m_missileCaliber(missileCaliber), m_missileVelocity(missileVelocity), m_limit(limit), m_bm(bm) {}
 
+  // Constructor for aliens
   Gun(std::string name, int holderAmmo, float caliber, float velocity, BulletManager & bm)
     : Gun(name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0, bm) {}
 
@@ -57,8 +57,7 @@ private:
   float m_limit;
   float m_score = 0;
   bool m_isReloading = false;
-  BulletManager m_false = BulletManager();
-  BulletManager & m_bm = m_false;
+  BulletManager & m_bm;
 
   void timer(int ms)
   {
@@ -66,6 +65,4 @@ private:
     clock_t end_time = clock() + ms * CLOCKS_PER_MSEC;
     while (clock() < end_time) {}
   }
-
-  int const GetHolderAmmo() const { return m_holderAmmo; }
 };
