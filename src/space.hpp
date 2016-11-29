@@ -23,6 +23,7 @@ class EndOfTheGameException : public std::exception {};
 class Space
 {
 public:
+  // TO DO: constructor from std::map
   Space(float pHealth, int pLives, std::string pGunName, int pGunHolderAmmo, float pGunBulletCaliber,
         float pGunBulletVelocity, float pGunMissileCaliber, float pGunMissileVelocity, float pGunLimit,
         int aNumber, float aHealth, std::string aGunName, int aGunHolderAmmo, float aGunBulletCaliber,
@@ -33,7 +34,7 @@ public:
   {
     m_ai.SetDamageHandler([this](float damage) { m_playerOne.Hit(damage); });
     m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
-    m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(); }); // Exception is caught in smth like GameManager
+    m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(); }); // Exception is caught in GameManager
   }
 
   void Update()

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "logger.hpp"
 #include "box2d.hpp"
 
 class GameEntity

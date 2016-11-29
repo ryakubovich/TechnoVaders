@@ -18,7 +18,10 @@ public:
     for (auto it = m_subObstacles.begin(); it != m_subObstacles.end(); ++it)
     {
       if (it->IsBoxIntersectingBox(hitBox))
+      {
         m_subObstacles.erase(it);
+        break;
+      }
     }
   }
 

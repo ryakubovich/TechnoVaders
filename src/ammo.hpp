@@ -39,8 +39,16 @@ public:
       it->Move();
   }
 
-  void CreateBullet(Box2D box) { m_playersBullets.emplace_back(Bullet(box)); }
-  void CreateBullet(Box2D box, float velocity, float power, Point2D direction) { m_playersBullets.emplace_back(Bullet(box, velocity, power, direction)); }
+  void CreateBullet(bool playersBullet, Box2D box)
+  {
+    if (playersBullet) m_playersBullets.emplace_back(Bullet(box));
+    else m_aliensBullets.emplace_back(Bullet(box));
+  }
+  void CreateBullet(bool playersBullet, Box2D box, float velocity, float power, Point2D direction)
+  {
+    if (playersBullet) m_playersBullets.emplace_back(Bullet(box, velocity, power, direction));
+    else m_aliensBullets.emplace_back(Bullet(box, velocity, power, direction));
+  }
 
   void DeleteBullet(bool playersBullet, std::list<Bullet>::iterator it)
   {

@@ -18,10 +18,11 @@ public:
     if (m_health <= 0) DecLives();
   }
 
+  void Shot() { m_gun.Shot(1, *this); }
   void IncScore() { m_score++; }
   void LaunchMissile()
   {
-    if (m_gun.GetScore() >= m_gun.GetLimit()) m_gun.Launch(this);
+    if (m_gun.GetScore() >= m_gun.GetLimit()) m_gun.Launch(*this);
     else
     {
       // Do something to highlight lack of score

@@ -16,7 +16,7 @@ public:
   Alien(Box2D box, float health, std::string name, int holderAmmo, float caliber, float velocity, BulletManager & bm)
     : Alien(box, health, name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0.0f, bm) {}
 
-  void Shot() { m_gun.Shot(this); }
+  void Shot() { m_gun.Shot(0, *this); }
   void Damage(float damage) { m_health -= damage; }
   float GetHealth() const { return m_health; }
   Gun const & GetGun() const { return m_gun; }

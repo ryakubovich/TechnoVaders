@@ -18,13 +18,15 @@ public:
   Gun(std::string name, int holderAmmo, float caliber, float velocity, BulletManager & bm)
     : Gun(name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0, bm) {}
 
-  void Shot(GameEntity * shooter)
+  void Shot(bool isPlayer, GameEntity const & shooter)
   {
+    Logger::Instance() << *this << std::endl;
     if (!m_isReloading)
     {
-      m_bm.CreateBullet(shooter->GetBox(), m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, 1.0f));
+      m_bm.CreateBullet(isPlayer, shooter.GetBox(), m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, 1.0f));
       if (--m_ammo == 0) Reload();
     }
+    Logger::Instance() << *this << std::endl;
   }
 
   void Reload()
@@ -37,9 +39,9 @@ public:
 
   void AccumulateScore(float damage) { m_score += damage; }
 
-  void Launch(GameEntity * shooter)
+  void Launch(GameEntity const & shooter)
   {
-    if (m_score >= m_limit) m_bm.CreateMissile(shooter->GetBox(), m_missileVelocity, m_missileVelocity * m_missileCaliber, Point2D(0.0f, 1.0f));
+    if (m_score >= m_limit) m_bm.CreateMissile(shooter.GetBox(), m_missileVelocity, m_missileVelocity * m_missileCaliber, Point2D(0.0f, 1.0f));
     m_score -= m_limit;
   }
 
