@@ -20,6 +20,12 @@ public:
   void Damage(float damage) { m_health -= damage; }
   float GetHealth() const { return m_health; }
   Gun const & GetGun() const { return m_gun; }
+
+  friend std::ostream & operator << (std::ostream & os, Alien const & alien)
+  {
+    os << "Alien: { Box = " << alien.m_box << " ; Health = " << alien.m_health << " ; Gun = " << alien.m_gun << " }";
+    return os;
+  }
   
 protected:
   float m_health = 100;

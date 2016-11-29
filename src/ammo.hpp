@@ -17,6 +17,13 @@ public:
   void Move() { GameEntity::Move(m_direction * m_velocity); }
   float GetPower() { return m_power; }
 
+  friend std::ostream & operator << (std::ostream & os, Bullet const & bullet)
+  {
+    os << "Bullet: { Box = " << bullet.m_box << " ; Velocity = " << bullet.m_velocity << " ; Power = " << bullet.m_power <<
+          " ; Direction = " << bullet.m_direction << " }";
+    return os;
+  }
+
 private:
   float m_velocity = 1;
   float m_power = 100;
@@ -50,6 +57,21 @@ public:
   std::list<Bullet> const & GetPlayersBullets() const { return m_playersBullets; }
   std::list<Bullet> const & GetAliensBullets() const { return m_aliensBullets; }
   std::list<Bullet> const & GetPlayersMissiles() const { return m_playersMissiles; }
+
+  friend std::ostream & operator << (std::ostream & os, BulletManager const & bm)
+  {
+    os << "BulletManager: { PlayersBullets = [";
+    for (auto const & pb : bm.m_playersBullets)
+      os << pb;
+    os << "]\nPlayersMissiles = [";
+    for (auto const & pm : bm.m_playersMissiles)
+      os << pm;
+    os << "]\nAliensBullets = [";
+    for (auto const & ab : bm.m_aliensBullets)
+      os << ab;
+    os << "] }";
+    return os;
+  }
 
 private:
   // Lists are used because of frequent deletion of randomly placed bullets

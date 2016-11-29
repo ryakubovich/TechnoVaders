@@ -46,6 +46,18 @@ public:
 
   void InputProcessing(InputType input);
 
+  friend std::ostream & operator << (std::ostream & os, Space const & space)
+  {
+    os << "Space: {";
+    os << space.m_bm;
+    os << space.m_ai;
+    os << space.m_playerOne;
+    os << "Obstacles: [";
+    for (auto const & obstacle: space.m_obstacles)
+      os << obstacle;
+    return os;
+  }
+
 private:
   BulletManager m_bm;
   AI m_ai;

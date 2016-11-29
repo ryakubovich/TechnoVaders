@@ -34,6 +34,14 @@ public:
   void SetDamageHandler(TOnDamageHandler const & handler) { m_damageHandler = handler; }
   void SetKillHandler(TOnKillHandler const & handler) { m_killHandler = handler; }
 
+  friend std::ostream & operator << (std::ostream & os, AI ai)
+  {
+    os << "AI: { Aliens: {";
+    for (auto const & alien: ai.m_aliens)
+      os << alien;
+    return os;
+  }
+
 private:
   std::list<Alien> m_aliens;
   TOnDamageHandler m_damageHandler = nullptr;

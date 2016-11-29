@@ -22,6 +22,7 @@ public:
     }
   }
 
+  // TO DO: process pits
   Box2D const GetOverallBox() const
   {
     auto it = m_subObstacles.begin();
@@ -33,6 +34,15 @@ public:
       max = std::max(max, it->GetMax());
     }
     return { min, max };
+  }
+
+  friend std::ostream & operator << (std::ostream & os, Obstacle const & obstacle)
+  {
+    os << "Obstacle: { Overall Box = " << obstacle.GetOverallBox() << " ; Small obstacles = [";
+    for (auto const & subObstacle: obstacle.m_subObstacles)
+      os << subObstacle;
+    os << "]}";
+    return os;
   }
 
 private:

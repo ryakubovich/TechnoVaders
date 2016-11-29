@@ -46,13 +46,22 @@ public:
   float const GetLimit() const { return m_limit; }
   float const GetScore() const { return m_score; }
 
+  friend std::ostream & operator << (std::ostream & os, Gun const & gun)
+  {
+    os << "Gun: { Name = " << gun.m_name << " ; Ammo = " << gun.m_ammo << " ; HolderAmmo = " << gun.m_holderAmmo << " ; BulletCaliber = " <<
+          gun.m_bulletCaliber << " ; BulletVelocity = " << gun.m_bulletVelocity << " ; MissileCaliber = " << gun.m_missileCaliber <<
+          " ; MissileVelocity = " << gun.m_missileVelocity << " ; Limit = " << gun.m_limit << " ; Score = " << gun.m_score << " ; IsReloading = " <<
+          gun.m_isReloading << " ; BulletManager = " << gun.m_bm;
+    return os;
+  }
+
 private:
   std::string m_name;
   int m_ammo;
   int m_holderAmmo;
   float m_bulletCaliber;
-  float m_missileCaliber;
   float m_bulletVelocity;
+  float m_missileCaliber;
   float m_missileVelocity;
   float m_limit;
   float m_score = 0;

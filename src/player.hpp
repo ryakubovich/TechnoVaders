@@ -31,6 +31,13 @@ public:
   using TOnNoLivesHandler = std::function<void()>;
   void SetNoLivesHandler(TOnNoLivesHandler handler) { m_noLivesHandler = handler; }
 
+  friend std::ostream & operator << (std::ostream & os, Player const & player)
+  {
+    os << "Player: { Box = " << player.m_box << " ; Health = " << player.m_health << " ; Gun = " << player.m_gun <<
+          " ; Lives = " << player.m_lives << " ; Score = " << player.m_score << " }";
+    return os;
+  }
+
 private:
   int m_score = 0;
   int m_lives;
