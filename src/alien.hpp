@@ -7,6 +7,7 @@
 class Alien : public GameEntity
 {
 public:
+  // Constructor for calling from Player instances (controlled from AI)
   Alien(Box2D box, float health, std::string name, int holderAmmo, float bulletCaliber, float bulletVelocity,
         float missileCaliber, float missileVelocity, float limit, BulletManager & bm)
     : GameEntity(box), m_health(health), m_gun(name, holderAmmo, bulletCaliber, bulletVelocity,

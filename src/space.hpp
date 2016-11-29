@@ -33,7 +33,7 @@ public:
   {
     m_ai.SetDamageHandler([this](float damage) { m_playerOne.Hit(damage); });
     m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
-    m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(); }); // Exception is catched in smth like GameManager
+    m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(); }); // Exception is caught in smth like GameManager
   }
 
   void Update()
