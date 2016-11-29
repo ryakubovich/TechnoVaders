@@ -10,6 +10,9 @@ public:
   AI(int aliensNumber, float health, std::string name, int holderAmmo, float bulletCaliber, float bullerVelocity, BulletManager & bm)
   {
     // Some algo to create aliens and to distibute them across the space
+    for (auto i = 0; i != 3; ++i)
+      m_aliens.emplace_back(Alien(Box2D(Point2D(i * 4.0f + i * 2.0f, 10.0f), Point2D((i+1) * 4.0f + i * 2.0f, 12.0f)),
+                                  100.0f, "alien", 10, 1.0f, 50.0f, 0.0f, 0.0f, 0.0f, bm));
   }
 
   void Update(); // Update positions of aliens
