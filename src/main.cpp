@@ -1,9 +1,18 @@
-#include <iostream>
+#include <QApplication>
+#include <QMainWindow>
+#include <QSurfaceFormat>
+#include "main_window.hpp"
 
-using namespace std;
-
-int main()
+int main(int argc, char ** argv)
 {
-  cout << "Hello World!" << endl;
-  return 0;
+  QApplication a(argc, argv);
+
+  QSurfaceFormat format;
+  format.setDepthBufferSize(24);
+  format.setStencilBufferSize(8);
+  QSurfaceFormat::setDefaultFormat(format);
+
+  MainWindow mw;
+  mw.show();
+  return a.exec();
 }
