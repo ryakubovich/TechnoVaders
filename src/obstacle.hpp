@@ -6,7 +6,7 @@
 class Obstacle
 {
 public:
-  Obstacle(Point2D min, Point2D max, float heightSub, float widthSub)
+  Obstacle(Point2D const & min, Point2D const & max, float const & heightSub, float const & widthSub)
   {
     for (int i = min.x(); i <= max.x() - widthSub; i += widthSub)
       for (int j = min.y(); j <= max.y() - heightSub; j += heightSub)
@@ -42,7 +42,7 @@ public:
   {
     os << "Obstacle: { Overall Box = " << obstacle.GetOverallBox() << " ; Small obstacles = [";
     for (auto const & subObstacle: obstacle.m_subObstacles)
-      os << subObstacle;
+      os << subObstacle << "," << std::endl;
     os << "]}";
     return os;
   }

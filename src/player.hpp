@@ -6,13 +6,14 @@
 class Player : public Alien
 {
 public:
-  Player(Box2D box, float health, int lives, std::string name, int holderAmmo, float bulletCaliber, float bulletVelocity,
-         float missileCaliber, float missileVelocity, float limit, BulletManager & bm)
+  Player(Box2D const & box, float const & health, int const & lives, std::string const & name, int const & holderAmmo,
+         float const & bulletCaliber, float const & bulletVelocity, float const & missileCaliber,
+         float const & missileVelocity, float const & limit, BulletManager & bm)
     : Alien(box, health, name, holderAmmo, bulletCaliber, bulletVelocity, missileCaliber, missileVelocity, limit, bm), m_lives(lives)
   {}
 
-  void Hit(float damage) { m_gun.AccumulateScore(damage); }
-  void Damage(float damage)
+  void Hit(float const & damage) { m_gun.AccumulateScore(damage); }
+  void Damage(float const & damage)
   {
     Alien::Damage(damage);
     if (m_health <= 0) DecLives();
@@ -31,7 +32,7 @@ public:
   }
 
   using TOnNoLivesHandler = std::function<void()>;
-  void SetNoLivesHandler(TOnNoLivesHandler handler) { m_noLivesHandler = handler; }
+  void SetNoLivesHandler(TOnNoLivesHandler const & handler) { m_noLivesHandler = handler; }
 
   friend std::ostream & operator << (std::ostream & os, Player const & player)
   {

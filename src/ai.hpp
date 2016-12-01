@@ -7,7 +7,8 @@
 class AI
 {
 public:
-  AI(int aliensNumber, float health, std::string name, int holderAmmo, float bulletCaliber, float bullerVelocity, BulletManager & bm)
+  AI(int const & aliensNumber, float const & health, std::string const & name, int const & holderAmmo,
+     float const & bulletCaliber, float const & bulletVelocity, BulletManager & bm)
   {
     // Some algo to create aliens and to distibute them across the space
     // This is a test constructor
@@ -18,7 +19,7 @@ public:
 
   void Update(); // Update positions of aliens
   void Shot(); // Some algo to shot player
-  std::list<Alien> & GetAliens() { return m_aliens; }
+  std::list<Alien> & GetAliens() { return m_aliens; } // Ref is necessary to be non-constant in order to be able to call ait->Damage(damage)
   std::list<Alien>::iterator Damage(std::list<Alien>::iterator ait, float const & damage)
   {
     if (m_damageHandler != nullptr) m_damageHandler(damage, ait->GetHealth());
@@ -41,7 +42,7 @@ public:
 
   friend std::ostream & operator << (std::ostream & os, AI ai)
   {
-    os << "AI: { Aliens: [\n";
+    os << "AI: { Aliens: [" << std::endl;
     for (auto const & alien: ai.m_aliens)
       os << alien << "," << std::endl;
     os << "]" << std::endl;

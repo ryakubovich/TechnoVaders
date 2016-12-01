@@ -8,13 +8,17 @@ class Alien : public GameEntity
 {
 public:
   // Constructor for calling from Player instances (controlled from AI not to be called)
-  Alien(Box2D box, float health, std::string name, int holderAmmo, float bulletCaliber, float bulletVelocity,
-        float missileCaliber, float missileVelocity, float limit, BulletManager & bm)
+  Alien(Box2D const & box, float const & health, std::string const & name, int const & holderAmmo,
+        float const & bulletCaliber, float const & bulletVelocity, float const & missileCaliber,
+        float const & missileVelocity, float const & limit, BulletManager & bm)
     : GameEntity(box), m_health(health), m_gun(name, holderAmmo, bulletCaliber, bulletVelocity,
-                                               missileCaliber, missileVelocity, limit, bm) {}
+                                               missileCaliber, missileVelocity, limit, bm)
+  {}
 
-  Alien(Box2D box, float health, std::string name, int holderAmmo, float caliber, float velocity, BulletManager & bm)
-    : Alien(box, health, name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0.0f, bm) {}
+  Alien(Box2D const & box, float const & health, std::string const & name, int const & holderAmmo,
+        float const & caliber, float const & velocity, BulletManager & bm)
+    : Alien(box, health, name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0.0f, bm)
+  {}
 
   void Shot() { m_gun.Shot(0, *this); }
   void Damage(float const & damage) { m_health -= damage; }

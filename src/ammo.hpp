@@ -62,15 +62,6 @@ public:
     else m_aliensBullets.emplace_back(Bullet(box, velocity, power, direction));
   }
 
-  std::list<Bullet>::iterator DeleteBullet(bool playersBullet, std::list<Bullet>::iterator it)
-  {
-    Logger::Instance() << "Deletion of bullet" << *it;
-    if (playersBullet)
-      return m_playersBullets.erase(it);
-    else
-      return m_aliensBullets.erase(it);
-  }
-
   bool DeleteBullet(bool playersBullet, Bullet const & bullet)
   {
     try
@@ -86,11 +77,9 @@ public:
   }
 
   void CreateMissile(Box2D const & box) { m_playersMissiles.emplace_back(Bullet(box)); }
-  void CreateMissile(Box2D const & box, float const & velocity, float const & power, Point2D const & direction) { m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction)); }
-  std::list<Bullet>::const_iterator DeleteMissile(std::list<Bullet>::const_iterator it)
+  void CreateMissile(Box2D const & box, float const & velocity, float const & power, Point2D const & direction)
   {
-    Logger::Instance() << "Deletion of missile" << *it;
-    return m_playersMissiles.erase(it);
+    m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction));
   }
 
   bool DeleteMissile(Bullet const & bullet)
@@ -139,7 +128,6 @@ public:
 
 private:
   // Lists are used because of frequent deletion of randomly placed bullets
-  // (but because of deletion implementation they could be vectors as well)
   std::list<Bullet> m_playersBullets;
   std::list<Bullet> m_aliensBullets;
   std::list<Bullet> m_playersMissiles;

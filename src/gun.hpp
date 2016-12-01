@@ -9,18 +9,19 @@ class Gun
 {
 public:
   // Constructor for players
-  Gun(std::string name, int holderAmmo, float bulletCaliber, float bulletVelocity, float missileCaliber, float missileVelocity,
-      float limit, BulletManager & bm)
+  Gun(std::string const & name, int const & holderAmmo, float const & bulletCaliber, float const & bulletVelocity,
+      float const & missileCaliber, float const & missileVelocity, float const & limit, BulletManager & bm)
     : m_name(name), m_ammo(holderAmmo), m_holderAmmo(holderAmmo), m_bulletCaliber(bulletCaliber), m_bulletVelocity(bulletVelocity),
-      m_missileCaliber(missileCaliber), m_missileVelocity(missileVelocity), m_limit(limit), m_bm(bm) {}
+      m_missileCaliber(missileCaliber), m_missileVelocity(missileVelocity), m_limit(limit), m_bm(bm)
+  {}
 
   // Constructor for aliens
   Gun(std::string name, int holderAmmo, float caliber, float velocity, BulletManager & bm)
-    : Gun(name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0, bm) {}
+    : Gun(name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0, bm)
+  {}
 
   void Shot(bool isPlayer, GameEntity const & shooter)
   {
-//    Logger::Instance() << *this << std::endl;
     if (!m_isReloading)
     {
       Box2D bulletBox(Point2D(shooter.GetBox().GetCenter().x() - 1.0f, shooter.GetBox().GetCenter().y()),
@@ -28,36 +29,36 @@ public:
       m_bm.CreateBullet(isPlayer, bulletBox, m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, 1.0f));
       if (--m_ammo == 0) Reload();
     }
-//    Logger::Instance() << *this << std::endl;
   }
 
   void Reload()
   {
     m_isReloading = true;
-    timer(3000); // 3 seconds
+    timer(1500); // 1,5 seconds; TO DO: make reload not to block the main thread
     m_isReloading = false;
     m_ammo = m_holderAmmo;
   }
 
-  void AccumulateScore(float damage) { m_score += damage; }
+  void AccumulateScore(float const & damage) { m_score += damage; }
 
   void Launch(GameEntity const & shooter)
   {
     Box2D missileBox(Point2D(shooter.GetBox().GetCenter().x() - 1.5f, shooter.GetBox().GetCenter().y()),
                  Point2D(shooter.GetBox().GetCenter().x() + 1.5f, shooter.GetBox().GetCenter().y() + 2.0f));
-    if (m_score >= m_limit) m_bm.CreateMissile(missileBox, m_missileVelocity, m_missileVelocity * m_missileCaliber, Point2D(0.0f, 1.0f));
+    if (m_score >= m_limit) m_bm.CreateMissile(missileBox, m_missileVelocity,
+                                               m_missileVelocity * m_missileCaliber, Point2D(0.0f, 1.0f));
     m_score -= m_limit;
   }
 
-  float const GetLimit() const { return m_limit; }
-  float const GetScore() const { return m_score; }
+  float const & GetLimit() const { return m_limit; }
+  float const & GetScore() const { return m_score; }
 
   friend std::ostream & operator << (std::ostream & os, Gun const & gun)
   {
-    os << "Gun: { Name = " << gun.m_name << " ; Ammo = " << gun.m_ammo << " ; HolderAmmo = " << gun.m_holderAmmo << " ; BulletCaliber = " <<
-          gun.m_bulletCaliber << " ; BulletVelocity = " << gun.m_bulletVelocity << " ; MissileCaliber = " << gun.m_missileCaliber <<
-          " ; MissileVelocity = " << gun.m_missileVelocity << " ; Limit = " << gun.m_limit << " ; Score = " << gun.m_score << " ; IsReloading = " <<
-          gun.m_isReloading << " ; BulletManager = " << gun.m_bm;
+    os << "Gun: { Name = " << gun.m_name << " ; Ammo = " << gun.m_ammo << " ; HolderAmmo = " << gun.m_holderAmmo
+       << " ; BulletCaliber = " << gun.m_bulletCaliber << " ; BulletVelocity = " << gun.m_bulletVelocity << " ; MissileCaliber = "
+       << gun.m_missileCaliber << " ; MissileVelocity = " << gun.m_missileVelocity << " ; Limit = " << gun.m_limit
+       << " ; Score = " << gun.m_score << " ; IsReloading = " << gun.m_isReloading << " ; BulletManager = " << gun.m_bm;
     return os;
   }
 
@@ -76,8 +77,8 @@ private:
 
   void timer(int ms)
   {
-    int CLOCKS_PER_MSEC = CLOCKS_PER_SEC / 1000;
-    clock_t end_time = clock() + ms * CLOCKS_PER_MSEC;
-    while (clock() < end_time) {}
+    int clocksPerMsec = CLOCKS_PER_SEC / 1000;
+    clock_t endTime = clock() + ms * clocksPerMsec;
+    while (clock() < endTime) {}
   }
 };

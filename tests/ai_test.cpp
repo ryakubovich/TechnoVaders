@@ -37,7 +37,7 @@ TEST(ai_test, bm_test)
     alien.Shot();
   EXPECT_EQ(bm.GetAliensBullets().size(), 3);
   auto aliensBullets = bm.GetAliensBullets();
-  bm.DeleteBullet(0, aliensBullets.begin());
+  bm.DeleteBullet(0, *(aliensBullets.begin()));
   Logger::Instance() << bm << std::endl;
   EXPECT_EQ(bm.GetAliensBullets().size(), 2);
 }
