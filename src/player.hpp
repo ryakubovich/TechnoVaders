@@ -20,6 +20,7 @@ public:
 
   void Shot() { m_gun.Shot(1, *this); }
   void IncScore() { m_score++; }
+  int const & GetScore() const { return m_score; }
   void LaunchMissile()
   {
     if (m_gun.GetScore() >= m_gun.GetLimit()) m_gun.Launch(*this);

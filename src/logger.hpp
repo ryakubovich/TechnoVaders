@@ -30,6 +30,14 @@ public:
     return *this;
   }
 
+  bool Trunc()
+  {
+    if (m_logFile.is_open())
+      m_logFile.close();
+    m_logFile.open("data/log.txt");
+    return m_logFile.is_open();
+  }
+
 private:
   friend class Singleton<Logger>;
   Logger() = default;

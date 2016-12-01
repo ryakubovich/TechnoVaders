@@ -2,3 +2,4 @@
 *.user
 *.pro
 sample*
+data/log.txt

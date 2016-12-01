@@ -13,16 +13,15 @@ public:
         m_subObstacles.emplace_back(Box2D(Point2D(i, j), Point2D(i + widthSub, j + heightSub)));
   }
 
-  void Damage(Box2D const & hitBox)
+  bool Damage(Box2D const & hitBox)
   {
     for (auto it = m_subObstacles.begin(); it != m_subObstacles.end(); ++it)
-    {
       if (it->IsBoxIntersectingBox(hitBox))
       {
         m_subObstacles.erase(it);
         break;
       }
-    }
+    return m_subObstacles.size() == 0;
   }
 
   // TO DO: process pits

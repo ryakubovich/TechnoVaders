@@ -6,16 +6,24 @@
 class Bullet : public GameEntity
 {
 public:
-  Bullet(Box2D box)
+  Bullet(Box2D const & box)
     : GameEntity(box)
   {}
 
-  Bullet(Box2D box, float velocity, float power, Point2D direction)
+  Bullet(Box2D const & box, float const & velocity, float const & power, Point2D const & direction)
     : GameEntity(box), m_velocity(velocity), m_power(power), m_direction(direction)
   {}
 
-  void Move() { GameEntity::Move(m_direction * m_velocity); }
-  float GetPower() { return m_power; }
+  void Move(Point2D movement = Point2D(0.0f, 0.0f)) { GameEntity::Move(m_direction * m_velocity + movement); }
+  float const & GetPower() const { return m_power; }
+
+  bool operator == (Bullet const & bullet)
+  {
+    return m_box == bullet.m_box
+        && m_velocity == bullet.m_velocity
+        && m_power == bullet.m_power
+        && m_direction == bullet.m_direction;
+  }
 
   friend std::ostream & operator << (std::ostream & os, Bullet const & bullet)
   {
@@ -37,30 +45,78 @@ public:
   {
     for (auto it = m_playersBullets.begin(); it != m_playersBullets.end(); ++it)
       it->Move();
+    for (auto mit = m_playersMissiles.begin(); mit != m_playersMissiles.end(); ++mit)
+      mit->Move();
+    for (auto ait = m_aliensBullets.begin(); ait != m_aliensBullets.end(); ++ait)
+      ait->Move();
   }
 
-  void CreateBullet(bool playersBullet, Box2D box)
+  void CreateBullet(bool playersBullet, Box2D const & box)
   {
     if (playersBullet) m_playersBullets.emplace_back(Bullet(box));
     else m_aliensBullets.emplace_back(Bullet(box));
   }
-  void CreateBullet(bool playersBullet, Box2D box, float velocity, float power, Point2D direction)
+  void CreateBullet(bool playersBullet, Box2D const & box, float const & velocity, float const & power, Point2D const & direction)
   {
     if (playersBullet) m_playersBullets.emplace_back(Bullet(box, velocity, power, direction));
     else m_aliensBullets.emplace_back(Bullet(box, velocity, power, direction));
   }
 
-  void DeleteBullet(bool playersBullet, std::list<Bullet>::iterator it)
+  std::list<Bullet>::iterator DeleteBullet(bool playersBullet, std::list<Bullet>::iterator it)
   {
+    Logger::Instance() << "Deletion of bullet" << *it;
     if (playersBullet)
-      m_playersBullets.erase(it);
+      return m_playersBullets.erase(it);
     else
-      m_aliensBullets.erase(it);
+      return m_aliensBullets.erase(it);
   }
 
-  void CreateMissile(Box2D box) { m_playersMissiles.emplace_back(Bullet(box)); }
-  void CreateMissile(Box2D box, float velocity, float power, Point2D direction) { m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction)); }
-  void DeleteMissile(std::list<Bullet>::iterator it) { m_playersMissiles.erase(it); }
+  bool DeleteBullet(bool playersBullet, Bullet const & bullet)
+  {
+    try
+    {
+      if (playersBullet) m_playersBullets.remove(bullet);
+      else m_aliensBullets.remove(bullet);
+      return true;
+    }
+    catch(...)
+    {
+      return false;
+    }
+  }
+
+  void CreateMissile(Box2D const & box) { m_playersMissiles.emplace_back(Bullet(box)); }
+  void CreateMissile(Box2D const & box, float const & velocity, float const & power, Point2D const & direction) { m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction)); }
+  std::list<Bullet>::const_iterator DeleteMissile(std::list<Bullet>::const_iterator it)
+  {
+    Logger::Instance() << "Deletion of missile" << *it;
+    return m_playersMissiles.erase(it);
+  }
+
+  bool DeleteMissile(Bullet const & bullet)
+  {
+    try
+    {
+      m_playersMissiles.remove(bullet);
+      return true;
+    }
+    catch(...) { return false; }
+  }
+
+  bool MoveMissile(Point2D const & movement)
+  {
+    try
+    {
+      auto it = m_playersMissiles.begin();
+      it->Move(movement);
+    }
+    catch (std::exception const & ex)
+    {
+      Logger::Instance() << ex.what();
+      return false;
+    }
+    return true;
+  }
 
   std::list<Bullet> const & GetPlayersBullets() const { return m_playersBullets; }
   std::list<Bullet> const & GetAliensBullets() const { return m_aliensBullets; }
@@ -68,21 +124,22 @@ public:
 
   friend std::ostream & operator << (std::ostream & os, BulletManager const & bm)
   {
-    os << "BulletManager: { PlayersBullets = [";
+    os << "BulletManager: { PlayersBullets = [\n";
     for (auto const & pb : bm.m_playersBullets)
-      os << pb;
+      os << pb << "," << std::endl;
     os << "]\nPlayersMissiles = [";
     for (auto const & pm : bm.m_playersMissiles)
-      os << pm;
+      os << pm << "," << std::endl;
     os << "]\nAliensBullets = [";
     for (auto const & ab : bm.m_aliensBullets)
-      os << ab;
+      os << ab << "," << std::endl;
     os << "] }";
     return os;
   }
 
 private:
   // Lists are used because of frequent deletion of randomly placed bullets
+  // (but because of deletion implementation they could be vectors as well)
   std::list<Bullet> m_playersBullets;
   std::list<Bullet> m_aliensBullets;
   std::list<Bullet> m_playersMissiles;

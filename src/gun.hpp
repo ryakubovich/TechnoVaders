@@ -20,13 +20,15 @@ public:
 
   void Shot(bool isPlayer, GameEntity const & shooter)
   {
-    Logger::Instance() << *this << std::endl;
+//    Logger::Instance() << *this << std::endl;
     if (!m_isReloading)
     {
-      m_bm.CreateBullet(isPlayer, shooter.GetBox(), m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, 1.0f));
+      Box2D bulletBox(Point2D(shooter.GetBox().GetCenter().x() - 1.0f, shooter.GetBox().GetCenter().y()),
+                   Point2D(shooter.GetBox().GetCenter().x() + 1.0f, shooter.GetBox().GetCenter().y() + isPlayer ? 2.0f : -2.0f));
+      m_bm.CreateBullet(isPlayer, bulletBox, m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, 1.0f));
       if (--m_ammo == 0) Reload();
     }
-    Logger::Instance() << *this << std::endl;
+//    Logger::Instance() << *this << std::endl;
   }
 
   void Reload()
@@ -41,7 +43,9 @@ public:
 
   void Launch(GameEntity const & shooter)
   {
-    if (m_score >= m_limit) m_bm.CreateMissile(shooter.GetBox(), m_missileVelocity, m_missileVelocity * m_missileCaliber, Point2D(0.0f, 1.0f));
+    Box2D missileBox(Point2D(shooter.GetBox().GetCenter().x() - 1.5f, shooter.GetBox().GetCenter().y()),
+                 Point2D(shooter.GetBox().GetCenter().x() + 1.5f, shooter.GetBox().GetCenter().y() + 2.0f));
+    if (m_score >= m_limit) m_bm.CreateMissile(missileBox, m_missileVelocity, m_missileVelocity * m_missileCaliber, Point2D(0.0f, 1.0f));
     m_score -= m_limit;
   }
 
