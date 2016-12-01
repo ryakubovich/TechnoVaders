@@ -2,4 +2,5 @@
 *.user
 *.pro
 sample*
-data/log.txt
+data/*.txt
+data/*.json
