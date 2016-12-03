@@ -4,6 +4,7 @@
 #include "logger.hpp"
 #include "json/json.h"
 #include "json/value.h"
+#include "gl_widget.hpp"
 #include <fstream>
 #include <map>
 #include <string>
@@ -13,8 +14,10 @@
 #include <QGridLayout>
 #include <QOpenGLWidget>
 #include <QStackedWidget>
+#include <iostream>
 
 using TSettings = std::map<std::string, std::string>;
+typedef void (QWidget::*QWidgetVoidSlot)();
 
 class MainWindow : public QMainWindow
 {
@@ -29,6 +32,7 @@ private:
   QWidget * m_mainWidget = new QWidget();
   QWidget * m_settingsWidget = new QWidget();
   QStackedWidget * m_stack = new QStackedWidget();
+  MainWindow * m_gameWindow = nullptr;
 
   TSettings LoadSettings() const
   {
@@ -64,7 +68,28 @@ private:
 
 private slots:
   void OnMainSettingsClicked() { m_stack->setCurrentIndex(1); }
-  void OnMainLaunchClicked() { if (m_glWidget != nullptr) setCentralWidget(m_glWidget); }
+  void OnMainLaunchClicked()
+  {
+    if (m_glWidget == nullptr)
+    {
+      std::string resolution;
+      if ((resolution = m_settingsWidget->findChild<QComboBox *>("resolution")->currentText().toStdString()) == "Full screen")
+        setWindowState(windowState() | Qt::WindowFullScreen);
+//      else
+//      {
+//        std::size_t xPos = resolution.find('x');
+//        int width = std::stoi(resolution.substr(0, xPos));
+//        int height = std::stoi(resolution.substr(xPos + 1));
+//      }
+      m_glWidget = new GLWidget(nullptr, qRgb(20, 20, 50));
+      m_timer = new QTimer(m_glWidget);
+      m_timer->setInterval(10);
+    }
+    m_glWidget->window()->setWindowTitle("Space Invaders");
+    setCentralWidget(m_glWidget);
+    connect(m_timer, &QTimer::timeout, m_glWidget, static_cast<QWidgetVoidSlot>(&QWidget::update));
+    m_timer->start();
+  }
   void OnSettingsBackClicked() { m_stack->setCurrentIndex(0); }
   void OnMainExitClicked()
   {

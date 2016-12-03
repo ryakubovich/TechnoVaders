@@ -12,7 +12,6 @@ MainWindow::MainWindow()
 {
   // TO DO: more styling
   TSettings loadedSettings = LoadSettings();
-  setFixedSize(600, 600);
   QPushButton * launchButton = new QPushButton("Launch", m_mainWidget);
   QPushButton * settingsButton = new QPushButton("Settings", m_mainWidget);
   QPushButton * exitButton = new QPushButton("Exit", m_mainWidget);
@@ -44,6 +43,6 @@ MainWindow::MainWindow()
   m_stack->addWidget(m_settingsWidget);
   m_stack->setCurrentIndex(0);
   setCentralWidget(m_stack);
-
+  setMinimumSize(600, 600);
   setFocusPolicy(Qt::StrongFocus);
 }
