@@ -3,6 +3,7 @@
 #include <initializer_list>
 #include "point2d.hpp"
 #include <memory>
+#include <iostream>
 
 class Box2D
 {
@@ -150,6 +151,15 @@ public:
 
   Point2D const & GetMin() const { return m_min; }
   Point2D const & GetMax() const { return m_max; }
+
+  void SetMin(Point2D const & point) { m_min = point; }
+  void SetMax(Point2D const & point) { m_max = point; }
+
+  friend std::ostream & operator << (std::ostream & os, Box2D box)
+  {
+    os << "Box: { Min = " << box.m_min << " ; Max = " << box.m_max << " }";
+    return os;
+  }
 
 private:
   Point2D m_min = Point2D(0.0f, 0.0f);

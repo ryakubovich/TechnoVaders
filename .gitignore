@@ -1,3 +1,6 @@
 *.o
 *.user
 *.pro
+sample*
+data/*.txt
+data/*.json
