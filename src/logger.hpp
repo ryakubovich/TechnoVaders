@@ -3,13 +3,15 @@
 #include <fstream>
 #include "singleton.hpp"
 
+std::string const logFileName = "data/log.txt";
+
 class Logger : public Singleton<Logger>
 {
 public:
   template<typename T> Logger & operator << (T const & obj)
   {
     if (!m_logFile.is_open())
-      m_logFile.open("data/log.txt");
+      m_logFile.open(logFileName);
     m_logFile << obj << std::endl;
     return *this;
   }
@@ -18,7 +20,7 @@ public:
   Logger & operator << (C<T, Args...> const & objs)
   {
     if (!m_logFile.is_open())
-      m_logFile.open("data/log.txt");
+      m_logFile.open(logFileName);
     for (auto const & obj : objs)
       m_logFile << obj << std::endl;
     return *this;
@@ -34,7 +36,7 @@ public:
   {
     if (m_logFile.is_open())
       m_logFile.close();
-    m_logFile.open("data/log.txt");
+    m_logFile.open(logFileName);
     return m_logFile.is_open();
   }
 

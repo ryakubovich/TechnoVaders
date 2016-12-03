@@ -6,7 +6,7 @@
 class Obstacle
 {
 public:
-  Obstacle(Point2D const & min, Point2D const & max, float const & heightSub, float const & widthSub)
+  Obstacle(Point2D const & min, Point2D const & max, float heightSub, float widthSub)
   {
     for (int i = min.x(); i <= max.x() - widthSub; i += widthSub)
       for (int j = min.y(); j <= max.y() - heightSub; j += heightSub)

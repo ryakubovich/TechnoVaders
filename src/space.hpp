@@ -8,6 +8,7 @@
 #include "obstacle.hpp"
 #include "player.hpp"
 
+using TObstacles = std::list<Obstacle>;
 enum InputType
 {
   Shot,
@@ -25,16 +26,16 @@ class Space
 {
 public:
   // TO DO: constructor from std::map; change player's box
-  Space(float const & pHealth, int const & pLives, std::string const & pGunName, int const & pGunHolderAmmo,
-        float const & pGunBulletCaliber, float const & pGunBulletVelocity, float const & pGunMissileCaliber,
-        float const & pGunMissileVelocity, float const & pGunLimit, int const & aNumber, float const & aHealth,
-        std::string const & aGunName, int const & aGunHolderAmmo, float const & aGunBulletCaliber,
-        float const & aGunBulletVelocity)
+  Space(float pHealth, int pLives, std::string const & pGunName, int pGunHolderAmmo,
+        float const & pGunBulletCaliber, float const & pGunBulletVelocity, float pGunMissileCaliber,
+        float pGunMissileVelocity, float pGunLimit, int aNumber, float aHealth,
+        std::string const & aGunName, int aGunHolderAmmo, float aGunBulletCaliber,
+        float aGunBulletVelocity)
     : m_playerOne(Box2D(1.0f, 1.0f, 6.0f, 6.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
                   pGunMissileCaliber, pGunMissileVelocity, pGunLimit, m_bm),
       m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm)
   {
-    m_ai.SetDamageHandler([this](float const & damage, float const & health) { m_playerOne.Hit(damage > health ? health : damage); });
+    m_ai.SetDamageHandler([this](float damage, float health) { m_playerOne.Hit(damage > health ? health : damage); });
     m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
     m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(); }); // Exception is caught in GameManager
   }
@@ -48,7 +49,7 @@ public:
   }
 
   // TO DO: calculate movements to depend on movement in a second and elapsed milliseconds
-  void InputProcessing(InputType const & input)
+  void InputProcessing(InputType input)
   {
     switch(input)
     {
@@ -93,19 +94,19 @@ public:
   Player const & GetPlayer() const { return m_playerOne; }
   BulletManager const & GetBM() const { return m_bm; }
   AI & GetAI() { return m_ai; }
-  std::list<Obstacle> const & GetObstacles() const { return m_obstacles; }
+  TObstacles const & GetObstacles() const { return m_obstacles; }
 
 private:
   BulletManager m_bm;
   AI m_ai;
   Player m_playerOne;
 //  Player m_playerTwo;
-  std::list<Obstacle> m_obstacles;
+  TObstacles m_obstacles;
 
   void IntersectionCheck()
   {
     // TO DO: delete players' bullets when hitting obstacles; combine missiles and players' bullets check to avoid double-cycling aliens
-    std::list<Bullet> bulletsToRemove;
+    TBullets bulletsToRemove;
     for (auto pit = m_bm.GetPlayersBullets().begin(); pit != m_bm.GetPlayersBullets().end(); ++pit)
       for (auto ait = m_ai.GetAliens().begin(); ait != m_ai.GetAliens().end(); ++ait)
         if (pit->GetBox().IsBoxIntersectingBox(ait->GetBox()))

@@ -10,7 +10,7 @@ public:
     : GameEntity(box)
   {}
 
-  Bullet(Box2D const & box, float const & velocity, float const & power, Point2D const & direction)
+  Bullet(Box2D const & box, float velocity, float power, Point2D const & direction)
     : GameEntity(box), m_velocity(velocity), m_power(power), m_direction(direction)
   {}
 
@@ -38,6 +38,8 @@ private:
   Point2D m_direction = { 0.0f, 1.0f };
 };
 
+using TBullets = std::list<Bullet>;
+
 class BulletManager
 {
 public:
@@ -56,7 +58,7 @@ public:
     if (playersBullet) m_playersBullets.emplace_back(Bullet(box));
     else m_aliensBullets.emplace_back(Bullet(box));
   }
-  void CreateBullet(bool playersBullet, Box2D const & box, float const & velocity, float const & power, Point2D const & direction)
+  void CreateBullet(bool playersBullet, Box2D const & box, float velocity, float power, Point2D const & direction)
   {
     if (playersBullet) m_playersBullets.emplace_back(Bullet(box, velocity, power, direction));
     else m_aliensBullets.emplace_back(Bullet(box, velocity, power, direction));
@@ -77,7 +79,7 @@ public:
   }
 
   void CreateMissile(Box2D const & box) { m_playersMissiles.emplace_back(Bullet(box)); }
-  void CreateMissile(Box2D const & box, float const & velocity, float const & power, Point2D const & direction)
+  void CreateMissile(Box2D const & box, float velocity, float power, Point2D const & direction)
   {
     m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction));
   }
@@ -107,9 +109,9 @@ public:
     return true;
   }
 
-  std::list<Bullet> const & GetPlayersBullets() const { return m_playersBullets; }
-  std::list<Bullet> const & GetAliensBullets() const { return m_aliensBullets; }
-  std::list<Bullet> const & GetPlayersMissiles() const { return m_playersMissiles; }
+  TBullets const & GetPlayersBullets() const { return m_playersBullets; }
+  TBullets const & GetAliensBullets() const { return m_aliensBullets; }
+  TBullets const & GetPlayersMissiles() const { return m_playersMissiles; }
 
   friend std::ostream & operator << (std::ostream & os, BulletManager const & bm)
   {
@@ -128,7 +130,7 @@ public:
 
 private:
   // Lists are used because of frequent deletion of randomly placed bullets
-  std::list<Bullet> m_playersBullets;
-  std::list<Bullet> m_aliensBullets;
-  std::list<Bullet> m_playersMissiles;
+  TBullets m_playersBullets;
+  TBullets m_aliensBullets;
+  TBullets m_playersMissiles;
 };

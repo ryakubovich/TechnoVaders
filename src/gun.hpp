@@ -9,14 +9,14 @@ class Gun
 {
 public:
   // Constructor for players
-  Gun(std::string const & name, int const & holderAmmo, float const & bulletCaliber, float const & bulletVelocity,
-      float const & missileCaliber, float const & missileVelocity, float const & limit, BulletManager & bm)
+  Gun(std::string const & name, int holderAmmo, float bulletCaliber, float bulletVelocity,
+      float missileCaliber, float missileVelocity, float limit, BulletManager & bm)
     : m_name(name), m_ammo(holderAmmo), m_holderAmmo(holderAmmo), m_bulletCaliber(bulletCaliber), m_bulletVelocity(bulletVelocity),
       m_missileCaliber(missileCaliber), m_missileVelocity(missileVelocity), m_limit(limit), m_bm(bm)
   {}
 
   // Constructor for aliens
-  Gun(std::string name, int holderAmmo, float caliber, float velocity, BulletManager & bm)
+  Gun(std::string const & name, int holderAmmo, float caliber, float velocity, BulletManager & bm)
     : Gun(name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0, bm)
   {}
 
@@ -39,7 +39,7 @@ public:
     m_ammo = m_holderAmmo;
   }
 
-  void AccumulateScore(float const & damage) { m_score += damage; }
+  void AccumulateScore(float damage) { m_score += damage; }
 
   void Launch(GameEntity const & shooter)
   {
