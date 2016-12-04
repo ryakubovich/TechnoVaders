@@ -19,8 +19,6 @@ namespace
 
 int constexpr kLeftDirection = 0;
 int constexpr kRightDirection = 1;
-int constexpr kUpDirection = 2;
-int constexpr kDownDirection = 3;
 
 bool IsLeftButton(Qt::MouseButtons buttons)
 {
@@ -52,7 +50,9 @@ GLWidget::GLWidget(MainWindow * mw, QColor const & background)
 GLWidget::~GLWidget()
 {
   makeCurrent();
-  delete m_texture;
+  delete m_textureAlien;
+  delete m_texturePlayer;
+  delete m_textureBullet;
   delete m_texturedRect;
   doneCurrent();
 }
@@ -63,8 +63,15 @@ void GLWidget::initializeGL()
 
   m_texturedRect = new TexturedRect();
   m_texturedRect->Initialize(this);
+  TLevelData LD = GetLevelData(m_levelNumber);
+  m_space1 = new Space(stof(LD["pHealth"]), stoi(LD["pLives"]), LD["pGunName"], stoi(LD["pGunHolderAmmo"]),
+      stof(LD["pGunBulletCaliber"]), stof(LD["pGunBulletVelocity"]), stof(LD["pGunMissileCaliber"]), stof(LD["pGunMissileVelocity"]),
+      stof(LD["pGunLimit"]), stoi(LD["aNumber"]), stof(LD["aHealth"]), LD["aGunName"], stoi(LD["aGunHolderAmmo"]),
+      stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]));
 
-  m_texture = new QOpenGLTexture(QImage("data/alien.png"));
+  m_textureAlien = new QOpenGLTexture(QImage("data/alien.png"));
+  m_texturePlayer = new QOpenGLTexture(QImage("data/starship.png"));
+  m_textureBullet = new QOpenGLTexture(QImage("data/bullet.png"));
 
   m_time.start();
 }
@@ -124,23 +131,40 @@ void GLWidget::resizeGL(int w, int h)
 
 void GLWidget::Update(float elapsedSeconds)
 {
-  float const kSpeed = 100.0f; // pixels per second.
+//  float const kSpeed = 100.0f; // pixels per second.
 
-  if (m_directions[kUpDirection])
-    m_position.setY(m_position.y() + kSpeed * elapsedSeconds);
-  if (m_directions[kDownDirection])
-    m_position.setY(m_position.y() - kSpeed * elapsedSeconds);
-  if (m_directions[kLeftDirection])
-    m_position.setX(m_position.x() - kSpeed * elapsedSeconds);
-  if (m_directions[kRightDirection])
-    m_position.setX(m_position.x() + kSpeed * elapsedSeconds);
+//  if (m_directions[kUpDirection])
+//    m_position.setY(m_position.y() + kSpeed * elapsedSeconds);
+//  if (m_directions[kDownDirection])
+//    m_position.setY(m_position.y() - kSpeed * elapsedSeconds);
+//  if (m_directions[kLeftDirection])
+//    m_position.setX(m_position.x() - kSpeed * elapsedSeconds);
+//  if (m_directions[kRightDirection])
+//    m_position.setX(m_position.x() + kSpeed * elapsedSeconds);
+  if (m_directions[kLeftDirection]) m_space1->InputProcessing(InputType::MoveLeft, elapsedSeconds);
+  else if (m_directions[kRightDirection]) m_space1->InputProcessing(InputType::MoveRight, elapsedSeconds);
+  m_space1->Update();
 }
 
 void GLWidget::Render()
 {
-  m_texturedRect->Render(m_texture, m_position, QSize(128, 128), m_screenSize);
-  m_texturedRect->Render(m_texture, QVector2D(400, 400), QSize(128, 128), m_screenSize);
-  m_texturedRect->Render(m_texture, QVector2D(600, 600), QSize(128, 128), m_screenSize);
+//  m_texturedRect->Render(m_textureAlien, m_position, QSize(128, 128), m_screenSize);
+//  m_texturedRect->Render(m_textureAlien, QVector2D(400, 400), QSize(128, 128), m_screenSize);
+//  m_texturedRect->Render(m_textureAlien, QVector2D(600, 600), QSize(128, 128), m_screenSize);
+  m_texturedRect->Render(m_texturePlayer,
+                         QVector2D(m_space1->GetPlayer().GetBox().GetCenter().x(),
+                                   m_space1->GetPlayer().GetBox().GetCenter().y()),
+                         QSize(512, 512), m_screenSize);
+  for (auto const & playerBullet : m_space1->GetBM().GetPlayersBullets())
+    m_texturedRect->Render(m_textureBullet,
+                           QVector2D(playerBullet.GetBox().GetCenter().x(),
+                                     playerBullet.GetBox().GetCenter().y()),
+                           QSize(256, 256), m_screenSize);
+  for (auto const & alien : m_space1->GetAI().GetAliens())
+    m_texturedRect->Render(m_textureAlien,
+                           QVector2D(alien.GetBox().GetCenter().x(),
+                                     alien.GetBox().GetCenter().y()),
+                           QSize(128, 128), m_screenSize);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent * e)
@@ -203,23 +227,17 @@ void GLWidget::wheelEvent(QWheelEvent * e)
 
 void GLWidget::keyPressEvent(QKeyEvent * e)
 {
-  if (e->key() == Qt::Key_Up)
-    m_directions[kUpDirection] = true;
-  else if (e->key() == Qt::Key_Down)
-    m_directions[kDownDirection] = true;
-  else if (e->key() == Qt::Key_Left)
+  if (e->key() == Qt::Key_Left)
     m_directions[kLeftDirection] = true;
   else if (e->key() == Qt::Key_Right)
     m_directions[kRightDirection] = true;
+  else if (e->key() == Qt::Key_Up)
+    m_space1->InputProcessing(InputType::Shot, 0.0f);
 }
 
 void GLWidget::keyReleaseEvent(QKeyEvent * e)
 {
-  if (e->key() == Qt::Key_Up)
-    m_directions[kUpDirection] = false;
-  else if (e->key() == Qt::Key_Down)
-    m_directions[kDownDirection] = false;
-  else if (e->key() == Qt::Key_Left)
+  if (e->key() == Qt::Key_Left)
     m_directions[kLeftDirection] = false;
   else if (e->key() == Qt::Key_Right)
     m_directions[kRightDirection] = false;

@@ -19,7 +19,23 @@ enum InputType
   MoveMissileRight
 };
 
-class EndOfTheGameException : public std::exception {};
+enum WinnerType
+{
+  PlayerWinner,
+  AIWinner
+};
+
+class EndOfTheGameException : public std::exception
+{
+public:
+  EndOfTheGameException(WinnerType winner)
+    : m_winner(winner)
+  {}
+  WinnerType GetWinner() const { return m_winner; }
+private:
+  WinnerType m_winner;
+};
+
 class WrongInputException : public std::exception {};
 
 class Space
@@ -31,25 +47,26 @@ public:
         float pGunMissileVelocity, float pGunLimit, int aNumber, float aHealth,
         std::string const & aGunName, int aGunHolderAmmo, float aGunBulletCaliber,
         float aGunBulletVelocity)
-    : m_playerOne(Box2D(1.0f, 1.0f, 6.0f, 6.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
+    : m_playerOne(Box2D(100.0f, 100.0f, 612.0f, 612.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
                   pGunMissileCaliber, pGunMissileVelocity, pGunLimit, m_bm),
       m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm)
   {
     m_ai.SetDamageHandler([this](float damage, float health) { m_playerOne.Hit(damage > health ? health : damage); });
     m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
-    m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(); }); // Exception is caught in GameManager
+    m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(WinnerType::AIWinner); }); // Exception is caught in GameManager
+    m_ai.SetNoAliensHandler([]() { throw EndOfTheGameException(WinnerType::PlayerWinner); });
   }
 
   void Update()
   {
     m_bm.Update();
-    //m_ai.Update();
+    m_ai.Update();
     IntersectionCheck();
     //m_ai.Shot();
   }
 
   // TO DO: calculate movements to depend on movement in a second and elapsed milliseconds
-  void InputProcessing(InputType input)
+  void InputProcessing(InputType input, float elapsedSeconds = 0.0f)
   {
     switch(input)
     {
@@ -57,10 +74,10 @@ public:
         m_playerOne.Shot();
         break;
       case InputType::MoveLeft:
-        m_playerOne.Move(Point2D(-1.0f, 0.0f));
+        m_playerOne.Move(Point2D(-100.0f, 0.0f) * elapsedSeconds);
         break;
       case InputType::MoveRight:
-        m_playerOne.Move(Point2D(1.0f, 0.0f));
+        m_playerOne.Move(Point2D(100.0f, 0.0f) * elapsedSeconds);
         break;
       case InputType::LaunchMissile:
         m_playerOne.LaunchMissile();

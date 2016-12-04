@@ -4,6 +4,8 @@
 #include <QOpenGLFunctions>
 #include <QTime>
 #include "textured_rect.hpp"
+#include "space.hpp"
+#include <string>
 
 #include <array>
 
@@ -46,9 +48,50 @@ private:
   QColor m_background;
   QSize m_screenSize;
 
-  QOpenGLTexture * m_texture = nullptr;
+  QOpenGLTexture * m_textureAlien = nullptr;
+  QOpenGLTexture * m_texturePlayer = nullptr;
+  QOpenGLTexture * m_textureBullet = nullptr;
   TexturedRect * m_texturedRect = nullptr;
 
+  Space * m_space1;
+  int m_levelNumber = 1;
   QVector2D m_position = QVector2D(200, 200);
   std::array<bool, 4> m_directions = {{ false, false, false, false }};
+
+  using TLevelData = std::map<std::string, std::string>;
+  TLevelData GetLevelData(int levelNumber)
+  {
+    TLevelData result;
+    std::ifstream levelFile("data/levels/" + std::to_string(levelNumber));
+    std::string parameter, value;
+    if (levelFile.is_open())
+    {
+      while (levelFile.good())
+      {
+        levelFile >> parameter >> value;
+        result[parameter] = value;
+      }
+    }
+    else
+    {
+      levelFile.close();
+      std::ofstream nextLevelFile("data/levels/" + std::to_string(levelNumber));
+      std::ifstream prevLevelFile("data/levels/" + std::to_string(levelNumber - 1));
+      while (prevLevelFile.good())
+      {
+        prevLevelFile >> parameter >> value;
+        if (parameter == "aGunName" || parameter == "pGunName")
+          result[parameter] = value;
+        else if (parameter == "pLives" || parameter == "pGunHolderAmmo" || parameter == "aNumber")
+          result[parameter] = std::to_string(stoi(value) * 11 / 10);
+        else
+          result[parameter] = std::to_string(stof(value) * 1.1f);
+      }
+      prevLevelFile.close();
+      for (auto it = result.begin(); it != result.end(); ++it)
+        nextLevelFile << it->first << it->second << std::endl;
+      nextLevelFile.close();
+    }
+    return result;
+  }
 };

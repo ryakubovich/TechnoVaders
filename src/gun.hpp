@@ -25,7 +25,7 @@ public:
     if (!m_isReloading)
     {
       Box2D bulletBox(Point2D(shooter.GetBox().GetCenter().x() - 1.0f, shooter.GetBox().GetCenter().y()),
-                   Point2D(shooter.GetBox().GetCenter().x() + 1.0f, shooter.GetBox().GetCenter().y() + isPlayer ? 2.0f : -2.0f));
+                   Point2D(shooter.GetBox().GetCenter().x() + 1.0f, shooter.GetBox().GetCenter().y() + isPlayer ? 20.0f : -20.0f));
       m_bm.CreateBullet(isPlayer, bulletBox, m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, 1.0f));
       if (--m_ammo == 0) Reload();
     }
