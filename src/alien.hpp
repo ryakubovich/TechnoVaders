@@ -20,7 +20,7 @@ public:
     : Alien(box, health, name, holderAmmo, caliber, velocity, 0.0f, 0.0f, 0.0f, bm)
   {}
 
-  void Shot() { m_gun.Shot(0, *this); }
+  void Shot() { m_gun.Shot(false, *this); }
   void Damage(float damage) { m_health -= damage; }
   float GetHealth() const { return m_health; }
   Gun const & GetGun() const { return m_gun; }

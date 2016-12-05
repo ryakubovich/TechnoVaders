@@ -19,7 +19,7 @@ public:
     if (m_health <= 0) DecLives();
   }
 
-  void Shot() { m_gun.Shot(1, *this); }
+  void Shot() { m_gun.Shot(true, *this); }
   void IncScore() { m_score++; }
   int const & GetScore() const { return m_score; }
   void LaunchMissile()

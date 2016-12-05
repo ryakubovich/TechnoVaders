@@ -70,8 +70,8 @@ void GLWidget::initializeGL()
       stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]));
 
   m_textureAlien = new QOpenGLTexture(QImage("data/alien.png"));
-  m_texturePlayer = new QOpenGLTexture(QImage("data/starship.png"));
-  m_textureBullet = new QOpenGLTexture(QImage("data/bullet.png"));
+  m_texturePlayer = new QOpenGLTexture(QImage("data/starship2.png"));
+  m_textureBullet = new QOpenGLTexture(QImage("data/bullet3.png"));
 
   m_time.start();
 }
@@ -131,16 +131,6 @@ void GLWidget::resizeGL(int w, int h)
 
 void GLWidget::Update(float elapsedSeconds)
 {
-//  float const kSpeed = 100.0f; // pixels per second.
-
-//  if (m_directions[kUpDirection])
-//    m_position.setY(m_position.y() + kSpeed * elapsedSeconds);
-//  if (m_directions[kDownDirection])
-//    m_position.setY(m_position.y() - kSpeed * elapsedSeconds);
-//  if (m_directions[kLeftDirection])
-//    m_position.setX(m_position.x() - kSpeed * elapsedSeconds);
-//  if (m_directions[kRightDirection])
-//    m_position.setX(m_position.x() + kSpeed * elapsedSeconds);
   if (m_directions[kLeftDirection]) m_space1->InputProcessing(InputType::MoveLeft, elapsedSeconds);
   else if (m_directions[kRightDirection]) m_space1->InputProcessing(InputType::MoveRight, elapsedSeconds);
   m_space1->Update();
@@ -154,12 +144,12 @@ void GLWidget::Render()
   m_texturedRect->Render(m_texturePlayer,
                          QVector2D(m_space1->GetPlayer().GetBox().GetCenter().x(),
                                    m_space1->GetPlayer().GetBox().GetCenter().y()),
-                         QSize(512, 512), m_screenSize);
+                         QSize(128, 128), m_screenSize);
   for (auto const & playerBullet : m_space1->GetBM().GetPlayersBullets())
     m_texturedRect->Render(m_textureBullet,
                            QVector2D(playerBullet.GetBox().GetCenter().x(),
                                      playerBullet.GetBox().GetCenter().y()),
-                           QSize(256, 256), m_screenSize);
+                           QSize(32, 32), m_screenSize);
   for (auto const & alien : m_space1->GetAI().GetAliens())
     m_texturedRect->Render(m_textureAlien,
                            QVector2D(alien.GetBox().GetCenter().x(),
