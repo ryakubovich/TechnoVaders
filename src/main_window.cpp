@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QFormLayout>
+#include <QLabel>
 #include <iostream>
 
 typedef void (QWidget::*QWidgetVoidSlot)();
@@ -45,4 +46,28 @@ MainWindow::MainWindow()
   setCentralWidget(m_stack);
   setMinimumSize(600, 600);
   setFocusPolicy(Qt::StrongFocus);
+}
+
+void MainWindow::AfterWonRound(int levelNumber, float score)
+{
+  setCentralWidget(m_stack);
+//  m_timer->stop();
+  Logger::Instance() << "C.1";
+//  m_winnerPage = new QWidget(this);
+  Logger::Instance() << "C.2";
+  QVBoxLayout * layout = new QVBoxLayout(m_winnerPage);
+  Logger::Instance() << "C1";
+  std::string labelString = "Congratulations! You won the round" + std::to_string(levelNumber) + "!";
+  layout->addWidget(new QLabel(QString(labelString.c_str())));
+  labelString = "Your score is " + std::to_string(score);
+  layout->addWidget(new QLabel(QString(labelString.c_str())));
+  Logger::Instance() << "C2";
+  QPushButton * continueButton = new QPushButton("Continue", m_winnerPage);
+  QPushButton * exitButton = new QPushButton("Exit", m_winnerPage);
+  connect(continueButton, SIGNAL(clicked()), this, SLOT(OnWinnerContinueClicked()));
+  connect(exitButton, SIGNAL(clicked()), this, SLOT(OnWinnerExitClicked()));
+  layout->addWidget(continueButton);
+  layout->addWidget(exitButton);
+  m_stack->addWidget(m_winnerPage);
+  m_stack->setCurrentIndex(3);
 }

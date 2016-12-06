@@ -7,6 +7,9 @@
 #include <QCoreApplication>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QGuiApplication>
+#include <QPushButton>
+#include <QGraphicsView>
+#include <QGraphicsScene>
 #include <cmath>
 
 #include <chrono>
@@ -45,6 +48,7 @@ GLWidget::GLWidget(MainWindow * mw, QColor const & background)
 {
   setMinimumSize(1024, 768);
   setFocusPolicy(Qt::StrongFocus);
+  connect(this, SIGNAL(PlayerWon()), m_mainWindow, SLOT(OnGameFinished()));
 }
 
 GLWidget::~GLWidget()
@@ -70,8 +74,8 @@ void GLWidget::initializeGL()
       stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]));
 
   m_textureAlien = new QOpenGLTexture(QImage("data/alien.png"));
-  m_texturePlayer = new QOpenGLTexture(QImage("data/starship2.png"));
-  m_textureBullet = new QOpenGLTexture(QImage("data/bullet3.png"));
+  m_texturePlayer = new QOpenGLTexture(QImage("data/starship_good.png"));
+  m_textureBullet = new QOpenGLTexture(QImage("data/bullet_good.png"));
 
   m_time.start();
 }
@@ -133,23 +137,30 @@ void GLWidget::Update(float elapsedSeconds)
 {
   if (m_directions[kLeftDirection]) m_space1->InputProcessing(InputType::MoveLeft, elapsedSeconds);
   else if (m_directions[kRightDirection]) m_space1->InputProcessing(InputType::MoveRight, elapsedSeconds);
-  m_space1->Update();
+  int score = m_space1->GetPlayer().GetScore();
+  try
+  {
+    m_space1->Update();
+  }
+  catch(EndOfTheGameException)
+  {
+//    if (m_mainWindow != nullptr) Logger::Instance() << "Game over, winner page entered";
+//    emit PlayerWon();
+//    QPushButton * continueButton = new QPushButton("Continue", this);
+  }
 }
 
 void GLWidget::Render()
 {
-//  m_texturedRect->Render(m_textureAlien, m_position, QSize(128, 128), m_screenSize);
-//  m_texturedRect->Render(m_textureAlien, QVector2D(400, 400), QSize(128, 128), m_screenSize);
-//  m_texturedRect->Render(m_textureAlien, QVector2D(600, 600), QSize(128, 128), m_screenSize);
   m_texturedRect->Render(m_texturePlayer,
                          QVector2D(m_space1->GetPlayer().GetBox().GetCenter().x(),
                                    m_space1->GetPlayer().GetBox().GetCenter().y()),
-                         QSize(128, 128), m_screenSize);
+                         QSize(90, 144), m_screenSize);
   for (auto const & playerBullet : m_space1->GetBM().GetPlayersBullets())
     m_texturedRect->Render(m_textureBullet,
                            QVector2D(playerBullet.GetBox().GetCenter().x(),
                                      playerBullet.GetBox().GetCenter().y()),
-                           QSize(32, 32), m_screenSize);
+                           QSize(9, 32), m_screenSize);
   for (auto const & alien : m_space1->GetAI().GetAliens())
     m_texturedRect->Render(m_textureAlien,
                            QVector2D(alien.GetBox().GetCenter().x(),

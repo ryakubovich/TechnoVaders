@@ -15,7 +15,7 @@ public:
     // Some algo to create aliens and to distribute them across the space
     // This is a test constructor
     for (auto i = 0; i < 3; ++i)
-      m_aliens.emplace_back(Alien(Box2D(Point2D(i * 128.0f + 3.0f, 400.0f), Point2D((i+1) * 128.0f + 2.0f, 528.0f)),
+      m_aliens.emplace_back(Alien(Box2D(Point2D(i * 129.0f + 3.0f, 400.0f), Point2D((i+1) * 129.0f + 2.0f, 528.0f)),
                                   100.0f, "M16A1", 10, 1.0f, 50.0f, 0.0f, 0.0f, 0.0f, bm));
   }
 

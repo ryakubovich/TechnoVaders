@@ -47,7 +47,7 @@ public:
         float pGunMissileVelocity, float pGunLimit, int aNumber, float aHealth,
         std::string const & aGunName, int aGunHolderAmmo, float aGunBulletCaliber,
         float aGunBulletVelocity)
-    : m_playerOne(Box2D(20.0f, 20.0f, 148.0f, 148.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
+    : m_playerOne(Box2D(20.0f, 20.0f, 110.0f, 164.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
                   pGunMissileCaliber, pGunMissileVelocity, pGunLimit, m_bm),
       m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm)
   {

@@ -24,12 +24,10 @@ public:
   {
     if (!m_isReloading)
     {
-      Box2D bulletBox(Point2D(shooter.GetBox().GetCenter().x() - 2.0f, shooter.GetBox().GetCenter().y()),
-                   Point2D(shooter.GetBox().GetCenter().x() + 2.0f, shooter.GetBox().GetCenter().y() + (isPlayer ? 20.0f : -20.0f)));
+      Box2D bulletBox(Point2D(shooter.GetBox().GetCenter().x() - 4.5f, shooter.GetBox().GetCenter().y()),
+                   Point2D(shooter.GetBox().GetCenter().x() + 4.5f, shooter.GetBox().GetCenter().y() + (isPlayer ? 32.0f : -32.0f)));
       m_bm.CreateBullet(isPlayer, bulletBox, m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, (isPlayer ? 1.0f : -1.0f)));
       if (--m_ammo == 0) Reload();
-      Logger::Instance() << "Shot: Player position = " << shooter.GetBox() << "Player center = " << shooter.GetBox().GetCenter() <<
-                            "Bullet position = " << bulletBox;
     }
   }
 

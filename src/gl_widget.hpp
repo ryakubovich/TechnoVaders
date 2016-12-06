@@ -22,6 +22,9 @@ public:
   GLWidget(MainWindow * mw, QColor const & background);
   ~GLWidget();
 
+Q_SIGNALS:
+  void PlayerWon();
+
 protected:
   void resizeGL(int w, int h) override;
   void paintGL() override;
