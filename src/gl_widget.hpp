@@ -2,6 +2,8 @@
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
+#include <QGraphicsView>
+#include <QPushButton>
 #include <QTime>
 #include "textured_rect.hpp"
 #include "space.hpp"
@@ -21,9 +23,6 @@ class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 public:
   GLWidget(MainWindow * mw, QColor const & background);
   ~GLWidget();
-
-Q_SIGNALS:
-  void PlayerWon();
 
 protected:
   void resizeGL(int w, int h) override;
@@ -45,6 +44,9 @@ private:
   int L2D(int px) const { return px * devicePixelRatio(); }
 
   MainWindow * m_mainWindow;
+  QPushButton * m_continueButton = nullptr;
+  QPushButton * m_exitButton = nullptr;
+  bool m_finished = false;
 
   unsigned int m_frames = 0;
   QTime m_time;
@@ -96,5 +98,17 @@ private:
       nextLevelFile.close();
     }
     return result;
+  }
+
+private slots:
+  void OnWinnerContinueClicked()
+  {
+    m_levelNumber++;
+    delete m_space1;
+    TLevelData LD = GetLevelData(m_levelNumber);
+    m_space1 = new Space(stof(LD["pHealth"]), stoi(LD["pLives"]), LD["pGunName"], stoi(LD["pGunHolderAmmo"]),
+        stof(LD["pGunBulletCaliber"]), stof(LD["pGunBulletVelocity"]), stof(LD["pGunMissileCaliber"]), stof(LD["pGunMissileVelocity"]),
+        stof(LD["pGunLimit"]), stoi(LD["aNumber"]), stof(LD["aHealth"]), LD["aGunName"], stoi(LD["aGunHolderAmmo"]),
+        stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]));
   }
 };

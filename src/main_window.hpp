@@ -86,8 +86,6 @@ private slots:
       m_timer = new QTimer(m_glWidget);
       m_timer->setInterval(10);
     }
-//    m_glWidget->window()->setWindowTitle("Space Invaders");
-//    setCentralWidget(m_glWidget);
     m_stack->addWidget(m_glWidget);
     m_stack->setCurrentIndex(2);
     connect(m_timer, &QTimer::timeout, m_glWidget, static_cast<QWidgetVoidSlot>(&QWidget::update));
@@ -99,22 +97,11 @@ private slots:
     if (!WriteSettings()) Logger::Instance() << "Unsuccessful write of the settings file";
     close();
   }
-  void OnWinnerContinueClicked()
-  {
-    m_stack->setCurrentIndex(2);
-    m_stack->removeWidget(m_winnerPage);
-    delete m_winnerPage;
-    m_winnerPage = nullptr;
-  }
   void OnWinnerExitClicked()
-  {
-    m_stack->setCurrentIndex(0);
-    delete m_glWidget;
-    m_glWidget = nullptr;
-  }
-  void OnGameFinished()
   {
     setWindowState(windowState() ^ Qt::WindowFullScreen);
     m_stack->setCurrentIndex(0);
+    delete m_glWidget;
+    m_glWidget = nullptr;
   }
 };

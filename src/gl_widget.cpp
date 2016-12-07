@@ -8,8 +8,8 @@
 #include <QtGui/QMouseEvent>
 #include <QtGui/QGuiApplication>
 #include <QPushButton>
-#include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QGraphicsProxyWidget>
 #include <cmath>
 
 #include <chrono>
@@ -48,7 +48,14 @@ GLWidget::GLWidget(MainWindow * mw, QColor const & background)
 {
   setMinimumSize(1024, 768);
   setFocusPolicy(Qt::StrongFocus);
-  connect(this, SIGNAL(PlayerWon()), m_mainWindow, SLOT(OnGameFinished()));
+  m_continueButton = new QPushButton("Continue", this);
+  m_exitButton = new QPushButton("Exit", this);
+  m_continueButton->move(600, 310);
+  m_exitButton->move(800, 310);
+  m_continueButton->setVisible(false);
+  m_exitButton->setVisible(false);
+  connect(m_continueButton, SIGNAL(clicked()), this, SLOT(OnWinnerContinueClicked()));
+  connect(m_exitButton, SIGNAL(clicked()), m_mainWindow, SLOT(OnWinnerExitClicked()));
 }
 
 GLWidget::~GLWidget()
@@ -116,6 +123,19 @@ void GLWidget::paintGL()
     painter.setPen(Qt::white);
     painter.drawText(20, 40, framesPerSecond + " fps");
   }
+
+  if (m_finished)
+  {
+    QString screenText, levelText, scoreText;
+    painter.setFont(QFont("Arial", 30));
+    screenText = "Congratulations! You won the round!";
+    QTextStream(&levelText) << "Level: " << m_levelNumber;
+    QTextStream(&scoreText) << "Score: " << m_space1->GetPlayer().GetScore();
+    painter.drawText(600, 200, screenText);
+    painter.drawText(600, 235, levelText);
+    painter.drawText(600, 270, scoreText);
+  }
+
   painter.end();
 
   if (!(m_frames % 100))
@@ -135,18 +155,20 @@ void GLWidget::resizeGL(int w, int h)
 
 void GLWidget::Update(float elapsedSeconds)
 {
-  if (m_directions[kLeftDirection]) m_space1->InputProcessing(InputType::MoveLeft, elapsedSeconds);
-  else if (m_directions[kRightDirection]) m_space1->InputProcessing(InputType::MoveRight, elapsedSeconds);
-  int score = m_space1->GetPlayer().GetScore();
-  try
+  if (!m_finished)
   {
-    m_space1->Update();
-  }
-  catch(EndOfTheGameException)
-  {
-//    if (m_mainWindow != nullptr) Logger::Instance() << "Game over, winner page entered";
-//    emit PlayerWon();
-//    QPushButton * continueButton = new QPushButton("Continue", this);
+    if (m_directions[kLeftDirection]) m_space1->InputProcessing(InputType::MoveLeft, elapsedSeconds);
+    else if (m_directions[kRightDirection]) m_space1->InputProcessing(InputType::MoveRight, elapsedSeconds);
+    try
+    {
+      m_space1->Update();
+    }
+    catch(EndOfTheGameException)
+    {
+      m_finished = true;
+      m_continueButton->setVisible(true);
+      m_exitButton->setVisible(true);
+    }
   }
 }
 
