@@ -56,12 +56,14 @@ private:
   QOpenGLTexture * m_textureAlien = nullptr;
   QOpenGLTexture * m_texturePlayer = nullptr;
   QOpenGLTexture * m_textureBullet = nullptr;
+  QOpenGLTexture * m_textureMissile = nullptr;
   TexturedRect * m_texturedRect = nullptr;
 
   Space * m_space1;
   int m_levelNumber = 1;
   QVector2D m_position = QVector2D(200, 200);
-  std::array<bool, 4> m_directions = {{ false, false, false, false }};
+  std::array<bool, 2> m_directions = {{ false, false }};
+  std::array<bool, 2> m_missileDirections = {{ false, false }};
 
   using TLevelData = std::map<std::string, std::string>;
   TLevelData GetLevelData(int levelNumber)
@@ -110,5 +112,8 @@ private slots:
         stof(LD["pGunBulletCaliber"]), stof(LD["pGunBulletVelocity"]), stof(LD["pGunMissileCaliber"]), stof(LD["pGunMissileVelocity"]),
         stof(LD["pGunLimit"]), stoi(LD["aNumber"]), stof(LD["aHealth"]), LD["aGunName"], stoi(LD["aGunHolderAmmo"]),
         stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]));
+    m_finished = false;
+    m_continueButton->setVisible(false);
+    m_exitButton->setVisible(false);
   }
 };

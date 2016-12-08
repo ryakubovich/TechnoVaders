@@ -51,7 +51,7 @@ target_link_libraries(${PROJECT_TEST_NAME} gtest gtest_main)
 qt5_use_modules(${PROJECT_TEST_NAME} Widgets OpenGL)
 # Finish tests setting up.
 add_test(test ${PROJECT_TEST_NAME})
-#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Debug)
 
 macro(copy_files GLOBPAT DESTINATION)
   file(GLOB COPY_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${GLOBPAT})

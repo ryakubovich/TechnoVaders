@@ -53,6 +53,19 @@ public:
   float const & GetLimit() const { return m_limit; }
   float const & GetScore() const { return m_score; }
 
+  bool operator == (Gun const & gun)
+  {
+    return m_name == gun.m_name
+        && m_ammo == gun.m_ammo
+        && m_holderAmmo == gun.m_holderAmmo
+        && m_bulletCaliber == gun.m_bulletCaliber
+        && m_bulletVelocity == gun.m_bulletVelocity
+        && m_missileVelocity == gun.m_missileVelocity
+        && m_missileCaliber == gun.m_missileCaliber
+        && m_limit == gun.m_limit
+        && m_score == gun.m_score;
+  }
+
   friend std::ostream & operator << (std::ostream & os, Gun const & gun)
   {
     os << "Gun: { Name = " << gun.m_name << " ; Ammo = " << gun.m_ammo << " ; HolderAmmo = " << gun.m_holderAmmo

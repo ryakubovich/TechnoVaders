@@ -14,7 +14,7 @@ public:
     : GameEntity(box), m_velocity(velocity), m_power(power), m_direction(direction)
   {}
 
-  void Move(Point2D movement = Point2D(0.0f, 0.0f)) { GameEntity::Move(m_direction * m_velocity + movement); }
+  void Move(float elapsedSeconds, Point2D movement = Point2D(0.0f, 0.0f)) { GameEntity::Move(m_direction * m_velocity * elapsedSeconds + movement); }
   float const & GetPower() const { return m_power; }
 
   bool operator == (Bullet const & bullet)
@@ -43,14 +43,14 @@ using TBullets = std::list<Bullet>;
 class BulletManager
 {
 public:
-  void Update()
+  void Update(float elapsedSeconds)
   {
     for (auto it = m_playersBullets.begin(); it != m_playersBullets.end(); ++it)
-      it->Move();
+      it->Move(elapsedSeconds);
     for (auto mit = m_playersMissiles.begin(); mit != m_playersMissiles.end(); ++mit)
-      mit->Move();
+      mit->Move(elapsedSeconds);
     for (auto ait = m_aliensBullets.begin(); ait != m_aliensBullets.end(); ++ait)
-      ait->Move();
+      ait->Move(elapsedSeconds);
   }
 
   void CreateBullet(bool playersBullet, Box2D const & box)
@@ -94,12 +94,12 @@ public:
     catch(...) { return false; }
   }
 
-  bool MoveMissile(Point2D const & movement)
+  bool MoveMissile(float elapsedSeconds, Point2D const & movement)
   {
     try
     {
       auto it = m_playersMissiles.begin();
-      it->Move(movement);
+      it->Move(elapsedSeconds, movement);
     }
     catch (std::exception const & ex)
     {

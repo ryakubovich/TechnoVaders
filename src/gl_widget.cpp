@@ -64,6 +64,7 @@ GLWidget::~GLWidget()
   delete m_textureAlien;
   delete m_texturePlayer;
   delete m_textureBullet;
+  delete m_textureMissile;
   delete m_texturedRect;
   doneCurrent();
 }
@@ -83,6 +84,7 @@ void GLWidget::initializeGL()
   m_textureAlien = new QOpenGLTexture(QImage("data/alien.png"));
   m_texturePlayer = new QOpenGLTexture(QImage("data/starship_good.png"));
   m_textureBullet = new QOpenGLTexture(QImage("data/bullet_good.png"));
+  m_textureMissile = new QOpenGLTexture(QImage("data/torpedo.png"));
 
   m_time.start();
 }
@@ -109,12 +111,23 @@ void GLWidget::paintGL()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  Render();
+  Render();      
 
   glDisable(GL_CULL_FACE);
   glDisable(GL_BLEND);
 
   painter.endNativePainting();
+
+  if (m_space1->GetObstacles().size() > 0)
+  {
+    QVector<QRectF> rectsToDraw;
+    for (auto const & obstacle : m_space1->GetObstacles())
+      for (auto const & subObstacle : obstacle.GetSubs())
+        rectsToDraw.append(QRect(QPoint(subObstacle.GetMin().x(), subObstacle.GetMax().y()),
+                                 QPoint(subObstacle.GetMax().x(), subObstacle.GetMin().y())));
+    painter.setBrush(QBrush(Qt::white));
+    painter.drawRects(rectsToDraw);
+  }
 
   if (elapsed != 0)
   {
@@ -128,11 +141,10 @@ void GLWidget::paintGL()
   {
     QString screenText, levelText, scoreText;
     painter.setFont(QFont("Arial", 30));
-    screenText = "Congratulations! You won the round!";
-    QTextStream(&levelText) << "Level: " << m_levelNumber;
-    QTextStream(&scoreText) << "Score: " << m_space1->GetPlayer().GetScore();
+    QTextStream(&levelText) << "level " << m_levelNumber << "!";
+    QTextStream(&scoreText) << "Your score: " << m_space1->GetPlayer().GetScore();
+    screenText = "Congratulations! You passed the " + levelText;
     painter.drawText(600, 200, screenText);
-    painter.drawText(600, 235, levelText);
     painter.drawText(600, 270, scoreText);
   }
 
@@ -159,9 +171,16 @@ void GLWidget::Update(float elapsedSeconds)
   {
     if (m_directions[kLeftDirection]) m_space1->InputProcessing(InputType::MoveLeft, elapsedSeconds);
     else if (m_directions[kRightDirection]) m_space1->InputProcessing(InputType::MoveRight, elapsedSeconds);
+
+    if (m_space1->GetBM().GetPlayersMissiles().size() > 0)
+    {
+      if (m_missileDirections[kLeftDirection]) m_space1->InputProcessing(InputType::MoveMissileLeft, elapsedSeconds);
+      else if (m_missileDirections[kRightDirection]) m_space1->InputProcessing(InputType::MoveMissileRight, elapsedSeconds);
+    }
+
     try
     {
-      m_space1->Update();
+      m_space1->Update(elapsedSeconds);
     }
     catch(EndOfTheGameException)
     {
@@ -188,6 +207,11 @@ void GLWidget::Render()
                            QVector2D(alien.GetBox().GetCenter().x(),
                                      alien.GetBox().GetCenter().y()),
                            QSize(128, 128), m_screenSize);
+  for (auto const & missile : m_space1->GetBM().GetPlayersMissiles())
+    m_texturedRect->Render(m_textureMissile,
+                           QVector2D(missile.GetBox().GetCenter().x(),
+                                     missile.GetBox().GetCenter().y()),
+                           QSize(60, 190), m_screenSize);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent * e)
@@ -254,8 +278,14 @@ void GLWidget::keyPressEvent(QKeyEvent * e)
     m_directions[kLeftDirection] = true;
   else if (e->key() == Qt::Key_Right)
     m_directions[kRightDirection] = true;
+  else if (e->key() == Qt::Key_A)
+    m_missileDirections[kLeftDirection] = true;
+  else if (e->key() == Qt::Key_D)
+    m_missileDirections[kRightDirection] = true;
   else if (e->key() == Qt::Key_Up)
     m_space1->InputProcessing(InputType::Shot, 0.0f);
+  else if (e->key() == Qt::Key_S)
+    m_space1->InputProcessing(InputType::LaunchMissile, 0.0f);
 }
 
 void GLWidget::keyReleaseEvent(QKeyEvent * e)
@@ -264,4 +294,8 @@ void GLWidget::keyReleaseEvent(QKeyEvent * e)
     m_directions[kLeftDirection] = false;
   else if (e->key() == Qt::Key_Right)
     m_directions[kRightDirection] = false;
+  else if (e->key() == Qt::Key_A)
+    m_missileDirections[kLeftDirection] = false;
+  else if (e->key() == Qt::Key_D)
+    m_missileDirections[kRightDirection] = false;
 }

@@ -3,13 +3,13 @@ pLives 10
 pGunName Default
 pGunHolderAmmo 100
 pGunBulletCaliber 10.0f
-pGunBulletVelocity 10.0f
+pGunBulletVelocity 300.0f
 pGunMissileCaliber 40.0f
-pGunMissileVelocity 10.0f
+pGunMissileVelocity 200.0f
 pGunLimit 140.0f
 aNumber 10
 aHealth 100.0f
 aGunName Default_alien
 aGunHolderAmmo 20.0f
 aGunBulletCaliber 10.0f
-aGunBulletVelocity 10.0f
+aGunBulletVelocity 200.0f

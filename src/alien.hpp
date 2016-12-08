@@ -25,6 +25,11 @@ public:
   float GetHealth() const { return m_health; }
   Gun const & GetGun() const { return m_gun; }
 
+  bool operator == (Alien const & alien)
+  {
+    return m_gun == alien.m_gun && m_health == alien.m_health;
+  }
+
   friend std::ostream & operator << (std::ostream & os, Alien const & alien)
   {
     os << "Alien: { Box = " << alien.m_box << " ; Health = " << alien.m_health << " ; Gun = " << alien.m_gun << " }";

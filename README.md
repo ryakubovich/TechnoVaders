@@ -8,11 +8,14 @@ Main contributors:
 TO DO:  
 - [x] find suitable models  
 - [ ] sort out positioning and rendering for default game mode:  
-  - [x] implement screen after level ending  
+  - [x] implement screen after level ending 
+  - [x] implement missiles logics
+  - [ ] find better model for missile
   - [ ] sort out obstacles rendering  
   - [ ] implement AI logics  
-  - [ ] add time-based movements  
+  - [x] add time-based movements  
   - [ ] add player's speed settings  
+  - [ ] add check for out-of-the-area objects
 - [ ] sort out in-code TO DOs  
 - [ ] set up 2-in-1 mode (2 players playing for each other)  
 - [ ] set up 2-in-2 mode (2 players playing against each other in 2 spaces - default mode in original game)  

@@ -55,17 +55,21 @@ public:
     m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
     m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(WinnerType::AIWinner); }); // Exception is caught in GameManager
     m_ai.SetNoAliensHandler([]() { throw EndOfTheGameException(WinnerType::PlayerWinner); });
+
+    for (int i = 0; i < 5; ++i)
+    {
+      m_obstacles.emplace_back(Obstacle(Point2D(i * 50.0f + 70.0f, 170.0f), Point2D((i+1) * 50.0f + 40.0f, 270.0f), 2.0f, 2.0f));
+    }
   }
 
-  void Update()
+  void Update(float elapsedSeconds)
   {
-    m_bm.Update();
-    m_ai.Update();
+    m_bm.Update(elapsedSeconds);
+    m_ai.Update(elapsedSeconds);
     IntersectionCheck();
     //m_ai.Shot();
   }
 
-  // TO DO: calculate movements to depend on movement in a second and elapsed milliseconds
   void InputProcessing(InputType input, float elapsedSeconds = 0.0f)
   {
     switch(input)
@@ -74,19 +78,19 @@ public:
         m_playerOne.Shot();
         break;
       case InputType::MoveLeft:
-        m_playerOne.Move(Point2D(-100.0f, 0.0f) * elapsedSeconds);
+        m_playerOne.Move(Point2D(-300.0f, 0.0f) * elapsedSeconds);
         break;
       case InputType::MoveRight:
-        m_playerOne.Move(Point2D(100.0f, 0.0f) * elapsedSeconds);
+        m_playerOne.Move(Point2D(300.0f, 0.0f) * elapsedSeconds);
         break;
       case InputType::LaunchMissile:
         m_playerOne.LaunchMissile();
         break;
       case InputType::MoveMissileLeft:
-        m_bm.MoveMissile(Point2D(-1.0f, 0.0f));
+        m_bm.MoveMissile(elapsedSeconds, Point2D(-1.0f, 0.0f));
         break;
       case InputType::MoveMissileRight:
-        m_bm.MoveMissile(Point2D(1.0f, 0.0f));
+        m_bm.MoveMissile(elapsedSeconds, Point2D(1.0f, 0.0f));
         break;
       default:
         throw WrongInputException();
@@ -124,26 +128,40 @@ private:
   {
     // TO DO: delete players' bullets when hitting obstacles; combine missiles and players' bullets check to avoid double-cycling aliens
     TBullets bulletsToRemove;
+//    TAliens aliensToRemove;
     for (auto pit = m_bm.GetPlayersBullets().begin(); pit != m_bm.GetPlayersBullets().end(); ++pit)
+    {
       for (auto ait = m_ai.GetAliens().begin(); ait != m_ai.GetAliens().end(); ++ait)
         if (pit->GetBox().IsBoxIntersectingBox(ait->GetBox()))
         {
           ait = m_ai.Damage(ait, pit->GetPower());
+//          aliensToRemove.push_back(*ait);
           bulletsToRemove.push_back(*pit);
           break;
         }
+//      for (auto const & alien : aliensToRemove)
+//        m_ai.RemoveAlien(alien);
+//      aliensToRemove.clear();
+    }
 
     for (auto const & bullet : bulletsToRemove) { m_bm.DeleteBullet(true, bullet); }
     bulletsToRemove.clear();
 
     for (auto mit = m_bm.GetPlayersMissiles().begin(); mit != m_bm.GetPlayersMissiles().end(); ++mit)
+    {
       for (auto ait = m_ai.GetAliens().begin(); ait != m_ai.GetAliens().end(); ++ait)
-        if (mit->GetBox().IsBoxIntersectingBox(ait->GetBox()))
+        if (ait->GetBox().IsBoxIntersectingBox(mit->GetBox()))
         {
           ait = m_ai.Damage(ait, mit->GetPower());
+//          aliensToRemove.push_back(*ait);
+          Logger::Instance() << "Alien deleted";
           bulletsToRemove.push_back(*mit);
           break;
         }
+//      for (auto const & alien : aliensToRemove)
+//        m_ai.RemoveAlien(alien);
+//      aliensToRemove.clear();
+    }
 
     for (auto const & missile : bulletsToRemove) { m_bm.DeleteMissile(missile); }
     bulletsToRemove.clear();
