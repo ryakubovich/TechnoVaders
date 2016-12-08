@@ -2,6 +2,7 @@
 
 #include <initializer_list>
 #include "point2d.hpp"
+#include "logger.hpp"
 #include <memory>
 #include <iostream>
 
@@ -102,7 +103,7 @@ public:
     // Checks for division by zero or negative number
     if (scale < kEps)
     {
-      std::cout << "Box scale err: div by zero or by negative float" << std::endl;
+      Logger::Instance() << "Box scale err: div by zero or by negative float";
       return *this;
     }
     float length_x = m_max.x() - m_min.x();
@@ -117,7 +118,7 @@ public:
     // Checks of division by zero or negative number
     if (scale < kEps)
     {
-      std::cout << "Box scale err: div by zero or by negative float" << std::endl;
+      Logger::Instance() << "Box scale err: div by zero or by negative float";
       return *this;
     }
     float length_x = m_max.x() - m_min.x();
@@ -170,8 +171,7 @@ private:
   {
     if (m_min.x() == m_max.x() || m_min.y() == m_max.y())
     {
-      std::cout << "Some coordinates are the same for both points, points are being switched to default values"
-                << std::endl;
+      Logger::Instance() << "Some coordinates are the same for both points, points are being switched to default values";
       m_min = m_max = Point2D();
     }
     else
@@ -189,6 +189,4 @@ private:
   {
     return fabs(v1 - v2) < kEps;
   }
-
-  float m_x = 0.0f, m_y = 0.0f;
 };

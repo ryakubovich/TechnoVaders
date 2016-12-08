@@ -41,24 +41,24 @@ class WrongInputException : public std::exception {};
 class Space
 {
 public:
-  // TO DO: constructor from std::map; change player's box
+  // TO DO: constructor from std::map
   Space(float pHealth, int pLives, std::string const & pGunName, int pGunHolderAmmo,
         float const & pGunBulletCaliber, float const & pGunBulletVelocity, float pGunMissileCaliber,
         float pGunMissileVelocity, float pGunLimit, int aNumber, float aHealth,
         std::string const & aGunName, int aGunHolderAmmo, float aGunBulletCaliber,
-        float aGunBulletVelocity)
-    : m_playerOne(Box2D(20.0f, 20.0f, 110.0f, 164.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
-                  pGunMissileCaliber, pGunMissileVelocity, pGunLimit, m_bm),
-      m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm)
+        float aGunBulletVelocity, float oWidth, float oHeight, int screenWidth, int screenHeight)
+    : m_bm(screenWidth, screenHeight), m_playerOne(Box2D(0.0f, 0.0f, 90.0f, 144.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
+                  pGunMissileCaliber, pGunMissileVelocity, pGunLimit, m_bm, screenWidth, screenHeight),
+      m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm, screenWidth, screenHeight)
   {
     m_ai.SetDamageHandler([this](float damage, float health) { m_playerOne.Hit(damage > health ? health : damage); });
     m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
     m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(WinnerType::AIWinner); }); // Exception is caught in GameManager
     m_ai.SetNoAliensHandler([]() { throw EndOfTheGameException(WinnerType::PlayerWinner); });
 
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 7; ++i)
     {
-      m_obstacles.emplace_back(Obstacle(Point2D(i * 50.0f + 70.0f, 170.0f), Point2D((i+1) * 50.0f + 40.0f, 270.0f), 2.0f, 2.0f));
+      m_obstacles.emplace_back(Obstacle(Point2D(i * 150.0f + 100.0f, 170.0f), Point2D((i+1) * 150.0f + 40.0f, 270.0f), oWidth, oHeight));
     }
   }
 
@@ -110,12 +110,17 @@ public:
     return os;
   }
 
-  // TO DO: add method to return all drawable objects in space
-  // These methods are only for testing purposes:
   Player const & GetPlayer() const { return m_playerOne; }
   BulletManager const & GetBM() const { return m_bm; }
   AI & GetAI() { return m_ai; }
   TObstacles const & GetObstacles() const { return m_obstacles; }
+
+  void Resized(int width, int height)
+  {
+    m_bm.Resized(width, height);
+    m_playerOne.Resized(width, height);
+    m_ai.Resized(width, height);
+  }
 
 private:
   BulletManager m_bm;
@@ -128,20 +133,28 @@ private:
   {
     // TO DO: delete players' bullets when hitting obstacles; combine missiles and players' bullets check to avoid double-cycling aliens
     TBullets bulletsToRemove;
-//    TAliens aliensToRemove;
+    int checkResult;
     for (auto pit = m_bm.GetPlayersBullets().begin(); pit != m_bm.GetPlayersBullets().end(); ++pit)
     {
       for (auto ait = m_ai.GetAliens().begin(); ait != m_ai.GetAliens().end(); ++ait)
         if (pit->GetBox().IsBoxIntersectingBox(ait->GetBox()))
         {
           ait = m_ai.Damage(ait, pit->GetPower());
-//          aliensToRemove.push_back(*ait);
           bulletsToRemove.push_back(*pit);
           break;
         }
-//      for (auto const & alien : aliensToRemove)
-//        m_ai.RemoveAlien(alien);
-//      aliensToRemove.clear();
+      for (auto oit = m_obstacles.begin(); oit != m_obstacles.end(); ++oit)
+      {
+        if (pit->GetBox().IsBoxIntersectingBox(oit->GetOverallBox()))
+        {
+          if ((checkResult = oit->Damage(pit->GetBox())) != DamageType::NoDamage)
+          {
+            if (checkResult == DamageType::Destroyed) m_obstacles.erase(oit);
+            bulletsToRemove.push_back(*pit);
+            break;
+          }
+        }
+      }
     }
 
     for (auto const & bullet : bulletsToRemove) { m_bm.DeleteBullet(true, bullet); }
@@ -153,14 +166,10 @@ private:
         if (ait->GetBox().IsBoxIntersectingBox(mit->GetBox()))
         {
           ait = m_ai.Damage(ait, mit->GetPower());
-//          aliensToRemove.push_back(*ait);
           Logger::Instance() << "Alien deleted";
           bulletsToRemove.push_back(*mit);
           break;
         }
-//      for (auto const & alien : aliensToRemove)
-//        m_ai.RemoveAlien(alien);
-//      aliensToRemove.clear();
     }
 
     for (auto const & missile : bulletsToRemove) { m_bm.DeleteMissile(missile); }

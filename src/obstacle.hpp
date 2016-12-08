@@ -5,39 +5,39 @@
 
 using TSubObstacles = std::list<Box2D>;
 
+enum DamageType
+{
+  NoDamage,
+  Damaged,
+  Destroyed
+};
+
 class Obstacle
 {
 public:
   Obstacle(Point2D const & min, Point2D const & max, float widthSub, float heightSub)
+    : m_overallBox(min, max)
   {
     for (int i = min.x(); i <= max.x() - widthSub; i += widthSub)
       for (int j = min.y(); j <= max.y() - heightSub; j += heightSub)
         m_subObstacles.emplace_back(Box2D(Point2D(i, j), Point2D(i + widthSub, j + heightSub)));
   }
 
-  bool Damage(Box2D const & hitBox)
+  int Damage(Box2D const & hitBox)
   {
     for (auto it = m_subObstacles.begin(); it != m_subObstacles.end(); ++it)
       if (it->IsBoxIntersectingBox(hitBox))
       {
         m_subObstacles.erase(it);
-        break;
+        return DamageType::Damaged;
       }
-    return m_subObstacles.size() == 0;
+    if (m_subObstacles.size() == 0) return DamageType::Destroyed;
+    else return DamageType::NoDamage;
   }
 
-  // TO DO: process pits
-  Box2D const GetOverallBox() const
+  Box2D const & GetOverallBox() const
   {
-    auto it = m_subObstacles.begin();
-    Point2D min = it->GetMin();
-    Point2D max = it->GetMax();
-    for (; ++it != m_subObstacles.end();)
-    {
-      min = std::min(min, it->GetMin());
-      max = std::max(max, it->GetMax());
-    }
-    return { min, max };
+    return m_overallBox;
   }
 
   TSubObstacles const & GetSubs() const { return m_subObstacles; }
@@ -52,5 +52,6 @@ public:
   }
 
 private:
+  Box2D m_overallBox;
   TSubObstacles m_subObstacles;
 };

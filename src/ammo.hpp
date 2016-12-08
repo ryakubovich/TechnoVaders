@@ -43,14 +43,35 @@ using TBullets = std::list<Bullet>;
 class BulletManager
 {
 public:
+  BulletManager(int screenWidth, int screenHeight)
+    : m_screenWidth(screenWidth), m_screenHeight(screenHeight)
+  {}
+
+  BulletManager() : BulletManager(10000, 5000) {}
+
   void Update(float elapsedSeconds)
   {
     for (auto it = m_playersBullets.begin(); it != m_playersBullets.end(); ++it)
+    {
       it->Move(elapsedSeconds);
+      if (it->GetBox().GetMin().y() > m_screenHeight) it = m_playersBullets.erase(it);
+    }
     for (auto mit = m_playersMissiles.begin(); mit != m_playersMissiles.end(); ++mit)
+    {
       mit->Move(elapsedSeconds);
+      if (mit->GetBox().GetMin().y() > m_screenHeight) mit = m_playersMissiles.erase(mit);
+    }
     for (auto ait = m_aliensBullets.begin(); ait != m_aliensBullets.end(); ++ait)
+    {
       ait->Move(elapsedSeconds);
+      if (ait->GetBox().GetMax().y() < 0) ait = m_aliensBullets.erase(ait);
+    }
+  }
+
+  void Resized(int width, int height)
+  {
+    m_screenWidth = width;
+    m_screenHeight = height;
   }
 
   void CreateBullet(bool playersBullet, Box2D const & box)
@@ -129,6 +150,8 @@ public:
   }
 
 private:
+  int m_screenWidth;
+  int m_screenHeight;
   // Lists are used because of frequent deletion of randomly placed bullets
   TBullets m_playersBullets;
   TBullets m_aliensBullets;

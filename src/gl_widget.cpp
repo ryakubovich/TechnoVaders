@@ -79,13 +79,16 @@ void GLWidget::initializeGL()
   m_space1 = new Space(stof(LD["pHealth"]), stoi(LD["pLives"]), LD["pGunName"], stoi(LD["pGunHolderAmmo"]),
       stof(LD["pGunBulletCaliber"]), stof(LD["pGunBulletVelocity"]), stof(LD["pGunMissileCaliber"]), stof(LD["pGunMissileVelocity"]),
       stof(LD["pGunLimit"]), stoi(LD["aNumber"]), stof(LD["aHealth"]), LD["aGunName"], stoi(LD["aGunHolderAmmo"]),
-      stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]));
+      stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]), stof(LD["oWidth"]), stof(LD["oHeight"]),
+      this->width(), this->height());
 
   m_textureAlien = new QOpenGLTexture(QImage("data/alien.png"));
   m_texturePlayer = new QOpenGLTexture(QImage("data/starship_good.png"));
   m_textureBullet = new QOpenGLTexture(QImage("data/bullet_good.png"));
   m_textureMissile = new QOpenGLTexture(QImage("data/torpedo.png"));
-
+  QImage texObstacle = QImage(stoi(LD["oWidth"]), stoi(LD["oHeight"]), QImage::Format_ARGB32_Premultiplied);
+  texObstacle.fill(Qt::white);
+  m_textureSubObstacle = new QOpenGLTexture(texObstacle);
   m_time.start();
 }
 
@@ -111,30 +114,33 @@ void GLWidget::paintGL()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  Render();      
+  Render();
 
   glDisable(GL_CULL_FACE);
   glDisable(GL_BLEND);
 
   painter.endNativePainting();
 
-  if (m_space1->GetObstacles().size() > 0)
-  {
-    QVector<QRectF> rectsToDraw;
-    for (auto const & obstacle : m_space1->GetObstacles())
-      for (auto const & subObstacle : obstacle.GetSubs())
-        rectsToDraw.append(QRect(QPoint(subObstacle.GetMin().x(), subObstacle.GetMax().y()),
-                                 QPoint(subObstacle.GetMax().x(), subObstacle.GetMin().y())));
-    painter.setBrush(QBrush(Qt::white));
-    painter.drawRects(rectsToDraw);
-  }
-
   if (elapsed != 0)
   {
-    QString framesPerSecond;
+    QString framesPerSecond, tmp;
     framesPerSecond.setNum(m_frames / (elapsed / 1000.0), 'f', 2);
     painter.setPen(Qt::white);
     painter.drawText(20, 40, framesPerSecond + " fps");
+//    for (int i = 0; i < height(); ++i)
+//    {
+//      tmp.clear();
+//      QTextStream(&tmp) << i * 100.0f;
+//      painter.drawLine(QPointF(0.0f, height() - i * 100.0f), QPointF(width(), height() - i * 100.0f));
+//      painter.drawText(0.0f, height() - i * 100.0f, tmp);
+//    }
+//    for (int i = 0; i < width(); ++i)
+//    {
+//      tmp.clear();
+//      QTextStream(&tmp) << i * 100.0f;
+//      painter.drawLine(QPointF(i * 100.0f, 0.0f), QPointF(i * 100.0f, height()));
+//      painter.drawText(i * 100, 20.0f, tmp);
+//    }
   }
 
   if (m_finished)
@@ -163,6 +169,8 @@ void GLWidget::resizeGL(int w, int h)
 {
   m_screenSize.setWidth(w);
   m_screenSize.setHeight(h);
+  m_space1->Resized(w, h);
+  Logger::Instance() << "Width: " << w << "Height: " << h;
 }
 
 void GLWidget::Update(float elapsedSeconds)
@@ -206,12 +214,20 @@ void GLWidget::Render()
     m_texturedRect->Render(m_textureAlien,
                            QVector2D(alien.GetBox().GetCenter().x(),
                                      alien.GetBox().GetCenter().y()),
-                           QSize(128, 128), m_screenSize);
+                           QSize(104, 77), m_screenSize);
   for (auto const & missile : m_space1->GetBM().GetPlayersMissiles())
     m_texturedRect->Render(m_textureMissile,
                            QVector2D(missile.GetBox().GetCenter().x(),
                                      missile.GetBox().GetCenter().y()),
                            QSize(60, 190), m_screenSize);
+  for (auto const & obstacle : m_space1->GetObstacles())
+    for (auto const & subObstacle : obstacle.GetSubs())
+      m_texturedRect->Render(m_textureSubObstacle,
+                             QVector2D(subObstacle.GetCenter().x(),
+                                       subObstacle.GetCenter().y()),
+                             QSize(subObstacle.GetMax().x() - subObstacle.GetMin().x(),
+                                   subObstacle.GetMax().y() - subObstacle.GetMin().y()),
+                             m_screenSize);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent * e)

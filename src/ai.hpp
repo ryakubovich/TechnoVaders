@@ -10,18 +10,30 @@ class AI
 {
 public:
   AI(int aliensNumber, float health, std::string const & name, int holderAmmo,
-     float bulletCaliber, float bulletVelocity, BulletManager & bm)
+     float bulletCaliber, float bulletVelocity, BulletManager & bm, int screenWidth, int screenHeight)
+    : m_screenWidth(screenWidth), m_screenHeight(screenHeight)
   {
     // Some algo to create aliens and to distribute them across the space
     // This is a test constructor
     for (auto i = 0; i < 6; ++i)
-      m_aliens.emplace_back(Alien(Box2D(Point2D(i * 129.0f + 3.0f, 400.0f), Point2D((i+1) * 129.0f + 2.0f, 528.0f)),
+      m_aliens.emplace_back(Alien(Box2D(Point2D(i * 105.0f + 3.0f, 400.0f), Point2D((i+1) * 129.0f + 2.0f, 477.0f)),
                                   100.0f, "M16A1", 10, 1.0f, 50.0f, 0.0f, 0.0f, 0.0f, bm));
   }
+
+  AI(int aliensNumber, float health, std::string const & name, int holderAmmo,
+     float bulletCaliber, float bulletVelocity, BulletManager & bm)
+    : AI(aliensNumber, health, name, holderAmmo, bulletCaliber, bulletVelocity, bm, 10000, 5000)
+  {}
 
   void Update(float elapsedSeconds)
   {
     if (m_aliens.size() == 0 && m_noAliensHandler != nullptr) m_noAliensHandler();
+  }
+
+  void Resized(int width, int height)
+  {
+    m_screenWidth = width;
+    m_screenHeight = height;
   }
 
   void Shot(); // Some algo to shot player
@@ -58,6 +70,8 @@ public:
   }
 
 private:
+  int m_screenWidth;
+  int m_screenHeight;
   TAliens m_aliens;
   TOnDamageHandler m_damageHandler = nullptr;
   TOnKillHandler m_killHandler = nullptr;

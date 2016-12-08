@@ -13,3 +13,5 @@ aGunName Default_alien
 aGunHolderAmmo 20.0f
 aGunBulletCaliber 10.0f
 aGunBulletVelocity 200.0f
+oWidth 20.0f
+oHeight 20.0f

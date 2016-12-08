@@ -11,11 +11,11 @@ TO DO:
   - [x] implement screen after level ending 
   - [x] implement missiles logics
   - [ ] find better model for missile
-  - [ ] sort out obstacles rendering  
+  - [x] sort out obstacles rendering  
   - [ ] implement AI logics  
   - [x] add time-based movements  
   - [ ] add player's speed settings  
-  - [ ] add check for out-of-the-area objects
+  - [x] add check for out-of-the-area objects
 - [ ] sort out in-code TO DOs  
 - [ ] set up 2-in-1 mode (2 players playing for each other)  
 - [ ] set up 2-in-2 mode (2 players playing against each other in 2 spaces - default mode in original game)  

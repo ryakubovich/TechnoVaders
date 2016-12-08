@@ -57,6 +57,7 @@ private:
   QOpenGLTexture * m_texturePlayer = nullptr;
   QOpenGLTexture * m_textureBullet = nullptr;
   QOpenGLTexture * m_textureMissile = nullptr;
+  QOpenGLTexture * m_textureSubObstacle = nullptr;
   TexturedRect * m_texturedRect = nullptr;
 
   Space * m_space1;
@@ -99,6 +100,9 @@ private:
         nextLevelFile << it->first << it->second << std::endl;
       nextLevelFile.close();
     }
+    Logger::Instance() << "Readed levelfile";
+    for (auto it = result.begin(); it != result.end(); ++it)
+      Logger::Instance() << it->first << it->second;
     return result;
   }
 
@@ -111,7 +115,8 @@ private slots:
     m_space1 = new Space(stof(LD["pHealth"]), stoi(LD["pLives"]), LD["pGunName"], stoi(LD["pGunHolderAmmo"]),
         stof(LD["pGunBulletCaliber"]), stof(LD["pGunBulletVelocity"]), stof(LD["pGunMissileCaliber"]), stof(LD["pGunMissileVelocity"]),
         stof(LD["pGunLimit"]), stoi(LD["aNumber"]), stof(LD["aHealth"]), LD["aGunName"], stoi(LD["aGunHolderAmmo"]),
-        stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]));
+        stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]), stof(LD["oWidth"]), stof(LD["oHeight"]),
+        this->width(), this->height());
     m_finished = false;
     m_continueButton->setVisible(false);
     m_exitButton->setVisible(false);
