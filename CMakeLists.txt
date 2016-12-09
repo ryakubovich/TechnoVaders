@@ -3,7 +3,7 @@ CMake_minimum_required(VERSION 2.8)
 add_definitions(--std=c++11)
 
 # Set up your project name.
-project(template)
+project(TechnoVaders)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -62,5 +62,5 @@ macro(copy_files GLOBPAT DESTINATION)
   endforeach(FILENAME)
 endmacro(copy_files)
 
-set(DATA_FILES_LIST data/alien.png)
+set(DATA_FILES_LIST data/*.png data/settings.json data/log.txt data/levels/*)
 copy_files("${DATA_FILES_LIST}" ${CMAKE_CURRENT_BINARY_DIR})

@@ -1,6 +1,12 @@
 #pragma once
 
 #include "alien.hpp"
+#include "obstacle.hpp"
+#include "player.hpp"
+#include "ray2d.hpp"
+#include <chrono>
+#include <cstdlib>
+#include <iterator>
 #include <list>
 #include <functional>
 
@@ -10,24 +16,71 @@ class AI
 {
 public:
   AI(int aliensNumber, float health, std::string const & name, int holderAmmo,
-     float bulletCaliber, float bulletVelocity, BulletManager & bm, int screenWidth, int screenHeight)
-    : m_screenWidth(screenWidth), m_screenHeight(screenHeight)
+     float bulletCaliber, float bulletVelocity, BulletManager & bm, float shotChance, int screenWidth, int screenHeight)
+    : m_screenWidth(screenWidth), m_screenHeight(screenHeight), m_lastShotTimestamp(std::chrono::steady_clock::now()),
+      m_shotChance(shotChance)
   {
     // Some algo to create aliens and to distribute them across the space
     // This is a test constructor
-    for (auto i = 0; i < 6; ++i)
-      m_aliens.emplace_back(Alien(Box2D(Point2D(i * 105.0f + 3.0f, 400.0f), Point2D((i+1) * 129.0f + 2.0f, 477.0f)),
-                                  100.0f, "M16A1", 10, 1.0f, 50.0f, 0.0f, 0.0f, 0.0f, bm));
+//    for (int i = 0; i < 6; ++i)
+//      m_aliens.emplace_back(Alien(Box2D(Point2D(i * 105.0f + 3.0f, 400.0f), Point2D((i+1) * 105.0f + 2.0f, 477.0f)),
+//                                  100.0f, "M16A1", 10, 1.0f, 50.0f, 0.0f, 0.0f, 0.0f, bm));
+
+    int constructedAliens, i;
+    constructedAliens = i = 0;
+    int row = 1;
+    float x, y;
+    while (constructedAliens < aliensNumber)
+    {
+      x = i * 105.0f + 3.0f;
+      y = screenHeight - 50 - 100 * row++;
+      m_aliens.emplace_back(Alien(Box2D(Point2D(x, y), Point2D(x + 107.0f, y + 77.0f)), health, name, holderAmmo, bulletCaliber,
+                                  bulletVelocity, bm));
+      i += row == 3 ? 1 : 0;
+      row = row == 3 ? 1 : row;
+      constructedAliens++;
+    }
   }
 
   AI(int aliensNumber, float health, std::string const & name, int holderAmmo,
      float bulletCaliber, float bulletVelocity, BulletManager & bm)
-    : AI(aliensNumber, health, name, holderAmmo, bulletCaliber, bulletVelocity, bm, 10000, 5000)
+    : AI(aliensNumber, health, name, holderAmmo, bulletCaliber, bulletVelocity, bm, 10, 10000, 5000)
   {}
 
   void Update(float elapsedSeconds)
   {
+    bool toMoveDown = false;
+    if (m_aliens.begin()->GetBox().GetMin().x() <= 0.0f) m_movement.x() = 100.0f;
+    else if (m_aliens.rbegin()->GetBox().GetMax().x() >= m_screenWidth)
+    {
+      m_movement.x() = -100.0f;
+      toMoveDown = true;
+    }
+    else if (m_movement.y() != 0.0f)
+    {
+      m_movement.y() = 0.0f;
+      toMoveDown = false;
+    }
+    for (auto it = m_aliens.begin(); it != m_aliens.end(); ++it)
+      it->Move(m_movement * elapsedSeconds + Point2D(0.0f, toMoveDown ? -50.0f : 0.0f));
     if (m_aliens.size() == 0 && m_noAliensHandler != nullptr) m_noAliensHandler();
+  }
+
+  void Shot(std::list<Obstacle> const & obstacles, Player const & player)
+  {
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_lastShotTimestamp);
+    if (duration.count() > 300)
+    {
+      int alienToShot = rand() % m_aliens.size();
+      auto it = m_aliens.begin();
+      std::advance(it, alienToShot);
+      Ray2D ray = { it->GetBox().GetCenter(), Point2D(0.0f, -1.0f) };
+      if (ray.IsRayIntersectingBox(player.GetBox()) && (rand() % 100 <= static_cast<int>(m_shotChance)))
+      {
+        it->Shot();
+        m_lastShotTimestamp = std::chrono::steady_clock::now();
+      }
+    }
   }
 
   void Resized(int width, int height)
@@ -36,7 +89,7 @@ public:
     m_screenHeight = height;
   }
 
-  void Shot(); // Some algo to shot player
+
   TAliens & GetAliens() { return m_aliens; } // Ref is necessary to be non-constant in order to be able to call ait->Damage(damage)
   TAliens::iterator Damage(TAliens::iterator ait, float damage)
   {
@@ -72,6 +125,9 @@ public:
 private:
   int m_screenWidth;
   int m_screenHeight;
+  Point2D m_movement = { 100.0f, 0.0f };
+  std::chrono::time_point<std::chrono::steady_clock> m_lastShotTimestamp;
+  float m_shotChance;
   TAliens m_aliens;
   TOnDamageHandler m_damageHandler = nullptr;
   TOnKillHandler m_killHandler = nullptr;

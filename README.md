@@ -12,7 +12,7 @@ TO DO:
   - [x] implement missiles logics
   - [ ] find better model for missile
   - [x] sort out obstacles rendering  
-  - [ ] implement AI logics  
+  - [x] implement AI logics  
   - [x] add time-based movements  
   - [ ] add player's speed settings  
   - [x] add check for out-of-the-area objects

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <iostream>
 #include "singleton.hpp"
 
 std::string const logFileName = "data/log.txt";
@@ -23,6 +24,14 @@ public:
       m_logFile.open(logFileName);
     for (auto const & obj : objs)
       m_logFile << obj << std::endl;
+    return *this;
+  }
+
+  Logger & operator << (std::string string)
+  {
+    if (!m_logFile.is_open())
+      m_logFile.open(logFileName);
+    m_logFile << string.c_str() << std::endl;
     return *this;
   }
 

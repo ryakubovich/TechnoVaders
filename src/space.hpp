@@ -41,15 +41,14 @@ class WrongInputException : public std::exception {};
 class Space
 {
 public:
-  // TO DO: constructor from std::map
   Space(float pHealth, int pLives, std::string const & pGunName, int pGunHolderAmmo,
         float const & pGunBulletCaliber, float const & pGunBulletVelocity, float pGunMissileCaliber,
         float pGunMissileVelocity, float pGunLimit, int aNumber, float aHealth,
         std::string const & aGunName, int aGunHolderAmmo, float aGunBulletCaliber,
-        float aGunBulletVelocity, float oWidth, float oHeight, int screenWidth, int screenHeight)
+        float aGunBulletVelocity, float oWidth, float oHeight, float shotChance, int screenWidth, int screenHeight)
     : m_bm(screenWidth, screenHeight), m_playerOne(Box2D(0.0f, 0.0f, 90.0f, 144.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
                   pGunMissileCaliber, pGunMissileVelocity, pGunLimit, m_bm, screenWidth, screenHeight),
-      m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm, screenWidth, screenHeight)
+      m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm, shotChance, screenWidth, screenHeight)
   {
     m_ai.SetDamageHandler([this](float damage, float health) { m_playerOne.Hit(damage > health ? health : damage); });
     m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
@@ -66,8 +65,8 @@ public:
   {
     m_bm.Update(elapsedSeconds);
     m_ai.Update(elapsedSeconds);
+    m_ai.Shot(m_obstacles, m_playerOne);
     IntersectionCheck();
-    //m_ai.Shot();
   }
 
   void InputProcessing(InputType input, float elapsedSeconds = 0.0f)
@@ -131,7 +130,7 @@ private:
 
   void IntersectionCheck()
   {
-    // TO DO: delete players' bullets when hitting obstacles; combine missiles and players' bullets check to avoid double-cycling aliens
+    // TO DO: combine missiles and players' bullets check to avoid double-cycling aliens
     TBullets bulletsToRemove;
     int checkResult;
     for (auto pit = m_bm.GetPlayersBullets().begin(); pit != m_bm.GetPlayersBullets().end(); ++pit)
@@ -186,9 +185,12 @@ private:
       for (auto oit = m_obstacles.begin(); oit != m_obstacles.end(); ++oit)
         if (ait->GetBox().IsBoxIntersectingBox(oit->GetOverallBox()))
         {
-          if (oit->Damage(ait->GetBox())) oit = m_obstacles.erase(oit);
-          bulletsToRemove.push_back(*ait);
-          break;
+          if ((checkResult = oit->Damage(ait->GetBox())) != DamageType::NoDamage)
+          {
+            if (checkResult == DamageType::Destroyed) m_obstacles.erase(oit);
+            bulletsToRemove.push_back(*ait);
+            break;
+          }
         }
     }
     for (auto const & bullet : bulletsToRemove) { m_bm.DeleteBullet(false, bullet); }

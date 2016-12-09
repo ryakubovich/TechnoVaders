@@ -15,3 +15,4 @@ aGunBulletCaliber 10.0f
 aGunBulletVelocity 200.0f
 oWidth 20.0f
 oHeight 20.0f
+shotChance 10.0f

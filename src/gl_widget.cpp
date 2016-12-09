@@ -79,14 +79,14 @@ void GLWidget::initializeGL()
   m_space1 = new Space(stof(LD["pHealth"]), stoi(LD["pLives"]), LD["pGunName"], stoi(LD["pGunHolderAmmo"]),
       stof(LD["pGunBulletCaliber"]), stof(LD["pGunBulletVelocity"]), stof(LD["pGunMissileCaliber"]), stof(LD["pGunMissileVelocity"]),
       stof(LD["pGunLimit"]), stoi(LD["aNumber"]), stof(LD["aHealth"]), LD["aGunName"], stoi(LD["aGunHolderAmmo"]),
-      stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]), stof(LD["oWidth"]), stof(LD["oHeight"]),
+      stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]), stof(LD["shotChance"]), stof(LD["oWidth"]), stof(LD["oHeight"]),
       this->width(), this->height());
 
   m_textureAlien = new QOpenGLTexture(QImage("data/alien.png"));
   m_texturePlayer = new QOpenGLTexture(QImage("data/starship_good.png"));
   m_textureBullet = new QOpenGLTexture(QImage("data/bullet_good.png"));
   m_textureMissile = new QOpenGLTexture(QImage("data/torpedo.png"));
-  QImage texObstacle = QImage(stoi(LD["oWidth"]), stoi(LD["oHeight"]), QImage::Format_ARGB32_Premultiplied);
+  QImage texObstacle = QImage(stof(LD["oWidth"]), stof(LD["oHeight"]), QImage::Format_ARGB32_Premultiplied);
   texObstacle.fill(Qt::white);
   m_textureSubObstacle = new QOpenGLTexture(texObstacle);
   m_time.start();
@@ -210,6 +210,11 @@ void GLWidget::Render()
                            QVector2D(playerBullet.GetBox().GetCenter().x(),
                                      playerBullet.GetBox().GetCenter().y()),
                            QSize(9, 32), m_screenSize);
+  for (auto const & alienBullet : m_space1->GetBM().GetAliensBullets())
+    m_texturedRect->Render(m_textureBullet,
+                           QVector2D(alienBullet.GetBox().GetCenter().x(),
+                                     alienBullet.GetBox().GetCenter().y()),
+                           QSize(9, 32), m_screenSize);
   for (auto const & alien : m_space1->GetAI().GetAliens())
     m_texturedRect->Render(m_textureAlien,
                            QVector2D(alien.GetBox().GetCenter().x(),
@@ -228,6 +233,12 @@ void GLWidget::Render()
                              QSize(subObstacle.GetMax().x() - subObstacle.GetMin().x(),
                                    subObstacle.GetMax().y() - subObstacle.GetMin().y()),
                              m_screenSize);
+}
+
+void GLWidget::showEvent(QShowEvent * event)
+{
+  QOpenGLWidget::showEvent(event);
+  this->setFocus();
 }
 
 void GLWidget::mousePressEvent(QMouseEvent * e)

@@ -32,6 +32,7 @@ protected:
   void Update(float elapsedSeconds);
   void Render();
 
+  void showEvent(QShowEvent * event) override;
   void mousePressEvent(QMouseEvent * e) override;
   void mouseDoubleClickEvent(QMouseEvent * e) override;
   void mouseMoveEvent(QMouseEvent * e) override;
@@ -70,7 +71,7 @@ private:
   TLevelData GetLevelData(int levelNumber)
   {
     TLevelData result;
-    std::ifstream levelFile("data/levels/" + std::to_string(levelNumber));
+    std::ifstream levelFile("data/levels/" + std::to_string(m_levelNumber));
     std::string parameter, value;
     if (levelFile.is_open())
     {
@@ -101,8 +102,6 @@ private:
       nextLevelFile.close();
     }
     Logger::Instance() << "Readed levelfile";
-    for (auto it = result.begin(); it != result.end(); ++it)
-      Logger::Instance() << it->first << it->second;
     return result;
   }
 
@@ -115,7 +114,7 @@ private slots:
     m_space1 = new Space(stof(LD["pHealth"]), stoi(LD["pLives"]), LD["pGunName"], stoi(LD["pGunHolderAmmo"]),
         stof(LD["pGunBulletCaliber"]), stof(LD["pGunBulletVelocity"]), stof(LD["pGunMissileCaliber"]), stof(LD["pGunMissileVelocity"]),
         stof(LD["pGunLimit"]), stoi(LD["aNumber"]), stof(LD["aHealth"]), LD["aGunName"], stoi(LD["aGunHolderAmmo"]),
-        stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]), stof(LD["oWidth"]), stof(LD["oHeight"]),
+        stof(LD["aGunBulletCaliber"]), stof(LD["aGunBulletVelocity"]), stof(LD["oWidth"]), stof(LD["oHeight"]), stof(LD["shotChance"]),
         this->width(), this->height());
     m_finished = false;
     m_continueButton->setVisible(false);

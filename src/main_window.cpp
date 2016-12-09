@@ -13,6 +13,9 @@ MainWindow::MainWindow()
 {
   // TO DO: more styling
   TSettings loadedSettings = LoadSettings();
+  Logger::Instance() << "Loaded";
+  for (auto it = loadedSettings.begin(); it != loadedSettings.end(); ++it)
+    Logger::Instance() << it->first.c_str() << it->second.c_str();
   QPushButton * launchButton = new QPushButton("Launch", m_mainWidget);
   QPushButton * settingsButton = new QPushButton("Settings", m_mainWidget);
   QPushButton * exitButton = new QPushButton("Exit", m_mainWidget);
