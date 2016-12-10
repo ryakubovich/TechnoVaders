@@ -8,6 +8,7 @@
 #include "textured_rect.hpp"
 #include "space.hpp"
 #include <string>
+#include <chrono>
 
 #include <array>
 
@@ -21,7 +22,7 @@ class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
   Q_OBJECT
 public:
-  GLWidget(MainWindow * mw, QColor const & background);
+  GLWidget(MainWindow * mw, QColor const & background, std::string const & difficulty, int playerSpeed);
   ~GLWidget();
 
 protected:
@@ -48,6 +49,10 @@ private:
   QPushButton * m_continueButton = nullptr;
   QPushButton * m_exitButton = nullptr;
   bool m_finished = false;
+  bool m_hasPlayerWon = false;
+  std::chrono::time_point<std::chrono::steady_clock> m_startTime;
+  int m_aliensSpeed = 1;
+  int m_playerSpeed = 10;
 
   unsigned int m_frames = 0;
   QTime m_time;
@@ -120,5 +125,6 @@ private slots:
     m_continueButton->setVisible(false);
     m_exitButton->setVisible(false);
     this->setFocus();
+    m_startTime = std::chrono::steady_clock::now();
   }
 };

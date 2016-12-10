@@ -43,8 +43,8 @@ bool IsRightButton(QMouseEvent const * const e)
 
 } // namespace
 
-GLWidget::GLWidget(MainWindow * mw, QColor const & background)
-  : m_mainWindow(mw), m_background(background)
+GLWidget::GLWidget(MainWindow * mw, QColor const & background, std::string const & difficulty, int playerSpeed)
+  : m_mainWindow(mw), m_background(background), m_playerSpeed(playerSpeed)
 {
   setMinimumSize(1024, 768);
   setFocusPolicy(Qt::StrongFocus);
@@ -56,6 +56,9 @@ GLWidget::GLWidget(MainWindow * mw, QColor const & background)
   m_exitButton->setVisible(false);
   connect(m_continueButton, SIGNAL(clicked()), this, SLOT(OnWinnerContinueClicked()));
   connect(m_exitButton, SIGNAL(clicked()), m_mainWindow, SLOT(OnWinnerExitClicked()));
+  if (difficulty == "Low") m_aliensSpeed = 1;
+  else if (difficulty == "Medium") m_aliensSpeed = 2;
+  else if (difficulty == "High") m_aliensSpeed = 3;
 }
 
 GLWidget::~GLWidget()
@@ -90,6 +93,7 @@ void GLWidget::initializeGL()
   texObstacle.fill(Qt::green);
   m_textureSubObstacle = new QOpenGLTexture(texObstacle);
   m_time.start();
+  m_startTime = std::chrono::steady_clock::now();
 }
 
 void GLWidget::paintGL()
@@ -123,7 +127,7 @@ void GLWidget::paintGL()
 
   if (elapsed != 0)
   {
-    QString framesPerSecond, tmp, score, lives, health, missile;
+    QString framesPerSecond, tmp, score, lives, health, missile, ammo;
     framesPerSecond.setNum(m_frames / (elapsed / 1000.0), 'f', 2);
     painter.setPen(Qt::white);
     painter.drawText(20, 40, framesPerSecond + " fps");
@@ -132,16 +136,23 @@ void GLWidget::paintGL()
     QTextStream(&lives) << "LIVES " << player.GetLives();
     QTextStream(&health) << "HEALTH " << player.GetHealth();
     QTextStream(&missile) << "MISSILE ";
-    painter.setFont(QFont("Times", 20, QFont::DemiBold));
+    painter.setFont(QFont("Times", 15, QFont::DemiBold));
     painter.drawText(140, 40, score);
     painter.drawText(350, 40, lives);
     painter.drawText(500, 40, health);
-    painter.drawText(700, 40, missile);
+    painter.drawText(690, 40, missile);
     painter.setBrush(QBrush(player.IsLaunchable() ? Qt::green : Qt::red));
-    painter.drawEllipse(QPointF(840.0f, 30.0f), 10.0f, 10.0f);
+    painter.drawEllipse(QPointF(806.0f, 30.0f), 10.0f, 10.0f);
     missile.clear();
     QTextStream(&missile) << "(" << player.GetGun().GetScore() << "/" << player.GetGun().GetLimit() << ")";
-    painter.drawText(870, 40, missile);
+    painter.drawText(835, 40, missile);
+    QTextStream(&ammo) << "AMMO ";
+    painter.drawText(940, 40, ammo);
+    painter.setBrush(QBrush(player.GetGun().GetAmmo() != 0 ? Qt::green : Qt::red));
+    painter.drawEllipse(QPointF(1040.0f, 30.0f), 10.0f, 10.0f);
+    ammo.clear();
+    QTextStream(&ammo) << "(" << player.GetGun().GetAmmo() << "/" << player.GetGun().GetHolderAmmo() << ")";
+    painter.drawText(1075, 40, ammo);
 
 #ifdef DEBUG // Change to working definition
     for (int i = 0; i < height(); ++i)
@@ -167,7 +178,7 @@ void GLWidget::paintGL()
     painter.setFont(QFont("Arial", 30));
     QTextStream(&levelText) << "level " << m_levelNumber << "!";
     QTextStream(&scoreText) << "Your score: " << m_space1->GetPlayer().GetScore();
-    screenText = "Congratulations! You passed the " + levelText;
+    screenText = m_hasPlayerWon ? "Congratulations! You passed the " + levelText : "You lost! Better luck next time";
     painter.drawText(600, 200, screenText);
     painter.drawText(600, 270, scoreText);
   }
@@ -195,23 +206,24 @@ void GLWidget::Update(float elapsedSeconds)
 {
   if (!m_finished)
   {
-    if (m_directions[kLeftDirection]) m_space1->InputProcessing(InputType::MoveLeft, elapsedSeconds);
-    else if (m_directions[kRightDirection]) m_space1->InputProcessing(InputType::MoveRight, elapsedSeconds);
+    if (m_directions[kLeftDirection]) m_space1->InputProcessing(InputType::MoveLeft, elapsedSeconds * m_playerSpeed);
+    else if (m_directions[kRightDirection]) m_space1->InputProcessing(InputType::MoveRight, elapsedSeconds * m_playerSpeed);
 
     if (m_space1->GetBM().GetPlayersMissiles().size() > 0)
     {
-      if (m_missileDirections[kLeftDirection]) m_space1->InputProcessing(InputType::MoveMissileLeft, elapsedSeconds);
-      else if (m_missileDirections[kRightDirection]) m_space1->InputProcessing(InputType::MoveMissileRight, elapsedSeconds);
+      if (m_missileDirections[kLeftDirection]) m_space1->InputProcessing(InputType::MoveMissileLeft, elapsedSeconds * m_aliensSpeed);
+      else if (m_missileDirections[kRightDirection]) m_space1->InputProcessing(InputType::MoveMissileRight, elapsedSeconds * m_aliensSpeed);
     }
 
     try
     {
-      m_space1->Update(elapsedSeconds);
+      m_space1->Update(elapsedSeconds * m_aliensSpeed);
     }
-    catch(EndOfTheGameException)
+    catch(EndOfTheGameException const & ex)
     {
       m_finished = true;
-      m_continueButton->setVisible(true);
+      m_hasPlayerWon = ex.GetWinner() == WinnerType::PlayerWinner;
+      if (m_hasPlayerWon) m_continueButton->setVisible(true);
       m_exitButton->setVisible(true);
     }
   }
