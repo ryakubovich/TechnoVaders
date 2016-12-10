@@ -80,10 +80,10 @@ public:
         m_playerOne.Shot();
         break;
       case InputType::MoveLeft:
-        m_playerOne.Move(Point2D(-300.0f, 0.0f) * elapsedSeconds);
+        m_playerOne.Move(Point2D(-30.0f, 0.0f) * elapsedSeconds);
         break;
       case InputType::MoveRight:
-        m_playerOne.Move(Point2D(300.0f, 0.0f) * elapsedSeconds);
+        m_playerOne.Move(Point2D(30.0f, 0.0f) * elapsedSeconds);
         break;
       case InputType::LaunchMissile:
         m_playerOne.LaunchMissile();

@@ -64,6 +64,8 @@ public:
 
   float const & GetLimit() const { return m_limit; }
   float const & GetScore() const { return m_score; }
+  int const & GetAmmo() const { return m_ammo; }
+  int const & GetHolderAmmo() const { return m_holderAmmo; }
 
   bool operator == (Gun const & gun)
   {
