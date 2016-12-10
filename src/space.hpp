@@ -46,18 +46,21 @@ public:
         float pGunMissileVelocity, float pGunLimit, int aNumber, float aHealth,
         std::string const & aGunName, int aGunHolderAmmo, float aGunBulletCaliber,
         float aGunBulletVelocity, float oWidth, float oHeight, float shotChance, int screenWidth, int screenHeight)
-    : m_bm(screenWidth, screenHeight), m_playerOne(Box2D(0.0f, 0.0f, 90.0f, 144.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
+    : m_bm(screenWidth, screenHeight),
+      m_playerOne(Box2D(0.0f, 0.0f, 90.0f, 144.0f), pHealth, pLives, pGunName, pGunHolderAmmo, pGunBulletCaliber, pGunBulletVelocity,
                   pGunMissileCaliber, pGunMissileVelocity, pGunLimit, m_bm, screenWidth, screenHeight),
-      m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm, shotChance, screenWidth, screenHeight)
+      m_ai(aNumber, aHealth, aGunName, aGunHolderAmmo, aGunBulletCaliber, aGunBulletVelocity, m_bm,
+           shotChance, screenWidth, screenHeight)
   {
     m_ai.SetDamageHandler([this](float damage, float health) { m_playerOne.Hit(damage > health ? health : damage); });
     m_ai.SetKillHandler([this]() { m_playerOne.IncScore(); });
     m_playerOne.SetNoLivesHandler([]() { throw EndOfTheGameException(WinnerType::AIWinner); }); // Exception is caught in GameManager
     m_ai.SetNoAliensHandler([]() { throw EndOfTheGameException(WinnerType::PlayerWinner); });
 
-    for (int i = 0; i < 7; ++i)
+    for (int i = 0; i < 4; ++i)
     {
-      m_obstacles.emplace_back(Obstacle(Point2D(i * 150.0f + 100.0f, 170.0f), Point2D((i+1) * 150.0f + 40.0f, 270.0f), oWidth, oHeight));
+      m_obstacles.emplace_back(Obstacle(Point2D(i * 350.0f + 60.0f, 170.0f), Point2D((i+1) * 350.0f - 100.0f, 270.0f),
+                                        oWidth, oHeight/*, screenWidth, screenHeight*/));
     }
   }
 
@@ -65,7 +68,7 @@ public:
   {
     m_bm.Update(elapsedSeconds);
     m_ai.Update(elapsedSeconds);
-    m_ai.Shot(m_obstacles, m_playerOne);
+    m_ai.Shot(m_playerOne);
     IntersectionCheck();
   }
 

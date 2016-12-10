@@ -15,8 +15,8 @@ enum DamageType
 class Obstacle
 {
 public:
-  Obstacle(Point2D const & min, Point2D const & max, float widthSub, float heightSub)
-    : m_overallBox(min, max)
+  Obstacle(Point2D const & min, Point2D const & max, float widthSub, float heightSub/*, int screenWidth, int screenHeight*/)
+    : m_overallBox(min, max)/*, m_kWidth(screenWidth / 1366.0f), m_kHeight(screenHeight / 768.0f)*/
   {
     for (int i = min.x(); i <= max.x() - widthSub; i += widthSub)
       for (int j = min.y(); j <= max.y() - heightSub; j += heightSub)
@@ -51,7 +51,22 @@ public:
     return os;
   }
 
+//  void Resized(int width, int height)
+//  {
+//    m_kWidth = (width / 1366.0f) / m_kWidth;
+//    m_kHeight = (height / 768.0f) / m_kHeight;
+//    for (auto & sub : m_subObstacles)
+//    {
+//      sub.SetMin(Point2D(sub.GetMin().x() * m_kWidth, sub.GetMin().y() * m_kHeight));
+//      sub.SetMax(Point2D(sub.GetMax().x() * m_kWidth, sub.GetMax().y() * m_kHeight));
+//    }
+//    m_overallBox.SetMin(Point2D(m_overallBox.GetMin().x() * m_kWidth, m_overallBox.GetMin().y() * m_kHeight));
+//    m_overallBox.SetMax(Point2D(m_overallBox.GetMax().x() * m_kWidth, m_overallBox.GetMax().y() * m_kHeight));
+//  }
+
 private:
   Box2D m_overallBox;
   TSubObstacles m_subObstacles;
+//  float m_kWidth;
+//  float m_kHeight;
 };

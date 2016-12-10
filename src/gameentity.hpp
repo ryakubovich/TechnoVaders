@@ -21,6 +21,12 @@ public:
     m_box.SetMax(m_box.GetMax() + offset);
   }
 
+  void ResizeBox(float kWidth, float kHeight)
+  {
+    m_box.SetMin(Point2D(m_box.GetMin().x() * kWidth, m_box.GetMin().y() * kHeight));
+    m_box.SetMax(Point2D(m_box.GetMax().x() * kWidth, m_box.GetMax().y() * kHeight));
+  }
+
   Box2D const & GetBox() const { return m_box; }
 
 protected:

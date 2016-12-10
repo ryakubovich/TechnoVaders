@@ -98,7 +98,7 @@ private:
       }
       prevLevelFile.close();
       for (auto it = result.begin(); it != result.end(); ++it)
-        nextLevelFile << it->first << it->second << std::endl;
+        nextLevelFile << it->first + " " << it->second << std::endl;
       nextLevelFile.close();
     }
     Logger::Instance() << "Readed levelfile";
@@ -119,5 +119,6 @@ private slots:
     m_finished = false;
     m_continueButton->setVisible(false);
     m_exitButton->setVisible(false);
+    this->setFocus();
   }
 };

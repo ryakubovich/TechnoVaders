@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <ctime>
+#include <chrono>
 #include "ammo.hpp"
 #include "gameentity.hpp"
 
@@ -27,24 +27,36 @@ public:
       Box2D bulletBox(Point2D(shooter.GetBox().GetCenter().x() - 4.5f, shooter.GetBox().GetCenter().y()),
                    Point2D(shooter.GetBox().GetCenter().x() + 4.5f, shooter.GetBox().GetCenter().y() + (isPlayer ? 32.0f : -32.0f)));
       m_bm.CreateBullet(isPlayer, bulletBox, m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, (isPlayer ? 1.0f : -1.0f)));
-      if (--m_ammo == 0) Reload();
+      if (--m_ammo == 0)
+      {
+        m_isReloading = true;
+        m_startOfReloading = std::chrono::steady_clock::now();
+      }
+    }
+    else
+    {
+      auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_startOfReloading);
+      if (duration.count() >= 3000)
+      {
+        m_isReloading = false;
+        Box2D bulletBox(Point2D(shooter.GetBox().GetCenter().x() - 4.5f, shooter.GetBox().GetMax().y()),
+                     Point2D(shooter.GetBox().GetCenter().x() + 4.5f, shooter.GetBox().GetMax().y() + (isPlayer ? 32.0f : -32.0f)));
+        m_bm.CreateBullet(isPlayer, bulletBox, m_bulletVelocity, m_bulletCaliber * m_bulletVelocity, Point2D(0.0f, (isPlayer ? 1.0f : -1.0f)));
+      }
     }
   }
 
   void Reload()
   {
-    m_isReloading = true;
-    timer(1500); // 1,5 seconds; TO DO: make reload not to block the main thread
-    m_isReloading = false;
-    m_ammo = m_holderAmmo;
+
   }
 
   void AccumulateScore(float damage) { m_score += damage; }
-
+  bool IsLaunched() const { return m_bm.GetPlayersMissiles().size() > 0; }
   void Launch(GameEntity const & shooter)
   {
-    Box2D missileBox(Point2D(shooter.GetBox().GetCenter().x() - 1.5f, shooter.GetBox().GetCenter().y()),
-                 Point2D(shooter.GetBox().GetCenter().x() + 1.5f, shooter.GetBox().GetCenter().y() + 2.0f));
+    Box2D missileBox(Point2D(shooter.GetBox().GetCenter().x() - 30.0f, shooter.GetBox().GetMax().y()),
+                 Point2D(shooter.GetBox().GetCenter().x() + 30.0f, shooter.GetBox().GetMax().y() + 90.0f));
     if (m_score >= m_limit) m_bm.CreateMissile(missileBox, m_missileVelocity,
                                                m_missileVelocity * m_missileCaliber, Point2D(0.0f, 1.0f));
     m_score -= m_limit;
@@ -87,11 +99,5 @@ private:
   float m_score = 0;
   bool m_isReloading = false;
   BulletManager & m_bm;
-
-  void timer(int ms)
-  {
-    int clocksPerMsec = CLOCKS_PER_SEC / 1000;
-    clock_t endTime = clock() + ms * clocksPerMsec;
-    while (clock() < endTime) {}
-  }
+  std::chrono::time_point<std::chrono::steady_clock> m_startOfReloading;
 };

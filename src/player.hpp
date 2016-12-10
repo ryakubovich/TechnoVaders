@@ -10,7 +10,7 @@ public:
           float bulletCaliber, float bulletVelocity, float missileCaliber,
           float missileVelocity, float limit, BulletManager & bm, int screenWidth, int screenHeight)
      : Alien(box, health, name, holderAmmo, bulletCaliber, bulletVelocity, missileCaliber, missileVelocity, limit, bm), m_lives(lives),
-       m_screenWidth(screenWidth), m_screenHeight(screenHeight)
+       m_screenWidth(screenWidth), m_screenHeight(screenHeight)/*, m_kWidth(screenWidth / 1366.0f), m_kHeight(screenHeight / 768.0f)*/
   {}
 
   Player(Box2D const & box, float health, int lives, std::string const & name, int holderAmmo,
@@ -31,11 +31,15 @@ public:
   {
     m_screenWidth = width;
     m_screenHeight = height;
+//    m_kWidth = (width / 1366.0f) / m_kWidth;
+//    m_kHeight = (height / 768.0f) / m_kHeight;
+//    GameEntity::ResizeBox(m_kWidth, m_kHeight);
+//    Logger::Instance() << m_kWidth << m_kHeight;
   }
 
   void Move(Point2D const & offset)
   {
-    GameEntity::Move(offset);
+    GameEntity::Move(offset/*Point2D(m_kWidth * offset.x(), m_kHeight * offset.y())*/);
     if (m_box.GetMin().x() < 0) GameEntity::Move(Point2D(-m_box.GetMin().x(), 0.0f));
     else if (m_box.GetMax().x() > m_screenWidth)
     {
@@ -47,14 +51,9 @@ public:
   void Shot() { m_gun.Shot(true, *this); }
   void IncScore() { m_score++; }
   int const & GetScore() const { return m_score; }
-  void LaunchMissile()
-  {
-    if (m_gun.GetScore() >= m_gun.GetLimit()) m_gun.Launch(*this);
-    else
-    {
-      // Do something to highlight lack of score
-    }
-  }
+  int const & GetLives() const { return m_lives; }
+  bool IsLaunchable() const { return m_gun.GetScore() >= m_gun.GetLimit() && !m_gun.IsLaunched(); }
+  void LaunchMissile() { if (IsLaunchable()) m_gun.Launch(*this); }
 
   using TOnNoLivesHandler = std::function<void()>;
   void SetNoLivesHandler(TOnNoLivesHandler const & handler) { m_noLivesHandler = handler; }
@@ -71,11 +70,14 @@ private:
   int m_lives;
   int m_screenWidth;
   int m_screenHeight;
+//  float m_kWidth;
+//  float m_kHeight;
   TOnNoLivesHandler m_noLivesHandler;
 
   void DecLives()
   {
       m_lives--;
       if (m_lives < 0) m_noLivesHandler();
+      m_health = 100;
   }
 };

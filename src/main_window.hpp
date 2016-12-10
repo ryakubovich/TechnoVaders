@@ -74,17 +74,20 @@ private slots:
     if (m_glWidget == nullptr)
     {
       std::string resolution;
+//      int width, height;
       if ((resolution = m_settingsWidget->findChild<QComboBox *>("resolution")->currentText().toStdString()) == "Full screen")
         setWindowState(windowState() | Qt::WindowFullScreen);
 //      else
 //      {
 //        std::size_t xPos = resolution.find('x');
-//        int width = std::stoi(resolution.substr(0, xPos));
-//        int height = std::stoi(resolution.substr(xPos + 1));
+//        width = std::stoi(resolution.substr(0, xPos));
+//        height = std::stoi(resolution.substr(xPos + 1));
 //      }
       m_glWidget = new GLWidget(this, qRgb(20, 20, 50));
       m_timer = new QTimer(m_glWidget);
       m_timer->setInterval(10);
+//      m_glWidget->setMinimumWidth(width);
+//      m_glWidget->setMinimumHeight(height);
     }
     m_stack->addWidget(m_glWidget);
     m_stack->setCurrentIndex(2);

@@ -87,7 +87,7 @@ void GLWidget::initializeGL()
   m_textureBullet = new QOpenGLTexture(QImage("data/bullet_good.png"));
   m_textureMissile = new QOpenGLTexture(QImage("data/torpedo.png"));
   QImage texObstacle = QImage(stof(LD["oWidth"]), stof(LD["oHeight"]), QImage::Format_ARGB32_Premultiplied);
-  texObstacle.fill(Qt::white);
+  texObstacle.fill(Qt::green);
   m_textureSubObstacle = new QOpenGLTexture(texObstacle);
   m_time.start();
 }
@@ -123,24 +123,42 @@ void GLWidget::paintGL()
 
   if (elapsed != 0)
   {
-    QString framesPerSecond, tmp;
+    QString framesPerSecond, tmp, score, lives, health, missile;
     framesPerSecond.setNum(m_frames / (elapsed / 1000.0), 'f', 2);
     painter.setPen(Qt::white);
     painter.drawText(20, 40, framesPerSecond + " fps");
-//    for (int i = 0; i < height(); ++i)
-//    {
-//      tmp.clear();
-//      QTextStream(&tmp) << i * 100.0f;
-//      painter.drawLine(QPointF(0.0f, height() - i * 100.0f), QPointF(width(), height() - i * 100.0f));
-//      painter.drawText(0.0f, height() - i * 100.0f, tmp);
-//    }
-//    for (int i = 0; i < width(); ++i)
-//    {
-//      tmp.clear();
-//      QTextStream(&tmp) << i * 100.0f;
-//      painter.drawLine(QPointF(i * 100.0f, 0.0f), QPointF(i * 100.0f, height()));
-//      painter.drawText(i * 100, 20.0f, tmp);
-//    }
+    Player const & player = m_space1->GetPlayer();
+    QTextStream(&score) << "SCORE " << player.GetScore();
+    QTextStream(&lives) << "LIVES " << player.GetLives();
+    QTextStream(&health) << "HEALTH " << player.GetHealth();
+    QTextStream(&missile) << "MISSILE ";
+    painter.setFont(QFont("Times", 20, QFont::DemiBold));
+    painter.drawText(140, 40, score);
+    painter.drawText(350, 40, lives);
+    painter.drawText(500, 40, health);
+    painter.drawText(700, 40, missile);
+    painter.setBrush(QBrush(player.IsLaunchable() ? Qt::green : Qt::red));
+    painter.drawEllipse(QPointF(840.0f, 30.0f), 10.0f, 10.0f);
+    missile.clear();
+    QTextStream(&missile) << "(" << player.GetGun().GetScore() << "/" << player.GetGun().GetLimit() << ")";
+    painter.drawText(870, 40, missile);
+
+#ifdef DEBUG // Change to working definition
+    for (int i = 0; i < height(); ++i)
+    {
+      tmp.clear();
+      QTextStream(&tmp) << i * 100.0f;
+      painter.drawLine(QPointF(0.0f, height() - i * 100.0f), QPointF(width(), height() - i * 100.0f));
+      painter.drawText(0.0f, height() - i * 100.0f, tmp);
+    }
+    for (int i = 0; i < width(); ++i)
+    {
+      tmp.clear();
+      QTextStream(&tmp) << i * 100.0f;
+      painter.drawLine(QPointF(i * 100.0f, 0.0f), QPointF(i * 100.0f, height()));
+      painter.drawText(i * 100, 20.0f, tmp);
+    }
+#endif
   }
 
   if (m_finished)
@@ -201,30 +219,53 @@ void GLWidget::Update(float elapsedSeconds)
 
 void GLWidget::Render()
 {
+  Box2D const & playerBox = m_space1->GetPlayer().GetBox();
   m_texturedRect->Render(m_texturePlayer,
-                         QVector2D(m_space1->GetPlayer().GetBox().GetCenter().x(),
-                                   m_space1->GetPlayer().GetBox().GetCenter().y()),
-                         QSize(90, 144), m_screenSize);
+                         QVector2D(playerBox.GetCenter().x(),
+                                   playerBox.GetCenter().y()),
+                         QSize(playerBox.GetMax().x() - playerBox.GetMin().x(),
+                               playerBox.GetMax().y() - playerBox.GetMin().y()),
+                         m_screenSize);
   for (auto const & playerBullet : m_space1->GetBM().GetPlayersBullets())
+  {
+    Box2D const & pBBox = playerBullet.GetBox();
     m_texturedRect->Render(m_textureBullet,
-                           QVector2D(playerBullet.GetBox().GetCenter().x(),
-                                     playerBullet.GetBox().GetCenter().y()),
-                           QSize(9, 32), m_screenSize);
+                           QVector2D(pBBox.GetCenter().x(),
+                                     pBBox.GetCenter().y()),
+                           QSize(pBBox.GetMax().x() - pBBox.GetMin().x(),
+                                 pBBox.GetMax().y() - pBBox.GetMin().y()),
+                           m_screenSize);
+  }
   for (auto const & alienBullet : m_space1->GetBM().GetAliensBullets())
+  {
+    Box2D const & aBBox = alienBullet.GetBox();
     m_texturedRect->Render(m_textureBullet,
-                           QVector2D(alienBullet.GetBox().GetCenter().x(),
-                                     alienBullet.GetBox().GetCenter().y()),
-                           QSize(9, 32), m_screenSize);
+                           QVector2D(aBBox.GetCenter().x(),
+                                     aBBox.GetCenter().y()),
+                           QSize(aBBox.GetMax().x() - aBBox.GetMin().x(),
+                                 aBBox.GetMax().y() - aBBox.GetMin().y()),
+                           m_screenSize);
+  }
   for (auto const & alien : m_space1->GetAI().GetAliens())
+  {
+    Box2D const & alienBox = alien.GetBox();
     m_texturedRect->Render(m_textureAlien,
-                           QVector2D(alien.GetBox().GetCenter().x(),
-                                     alien.GetBox().GetCenter().y()),
-                           QSize(104, 77), m_screenSize);
+                           QVector2D(alienBox.GetCenter().x(),
+                                     alienBox.GetCenter().y()),
+                           QSize(alienBox.GetMax().x() - alienBox.GetMin().x(),
+                                 alienBox.GetMax().y() - alienBox.GetMin().y()),
+                           m_screenSize);
+  }
   for (auto const & missile : m_space1->GetBM().GetPlayersMissiles())
+  {
+    Box2D const & mBox = missile.GetBox();
     m_texturedRect->Render(m_textureMissile,
-                           QVector2D(missile.GetBox().GetCenter().x(),
-                                     missile.GetBox().GetCenter().y()),
-                           QSize(60, 190), m_screenSize);
+                           QVector2D(mBox.GetCenter().x(),
+                                     mBox.GetCenter().y()),
+                           QSize(mBox.GetMax().x() - mBox.GetMin().x(),
+                                 mBox.GetMax().y() - mBox.GetMin().y()),
+                           m_screenSize);
+  }
   for (auto const & obstacle : m_space1->GetObstacles())
     for (auto const & subObstacle : obstacle.GetSubs())
       m_texturedRect->Render(m_textureSubObstacle,

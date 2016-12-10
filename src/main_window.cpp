@@ -36,12 +36,18 @@ MainWindow::MainWindow()
   difficultyChoice->setCurrentText(QString(loadedSettings.find("Difficulty")->second.c_str()));
   QComboBox * resolutionChoice = new QComboBox(m_settingsWidget);
   resolutionChoice->setObjectName("resolution");
-  resolutionChoice->addItems({ "640x480", "800x600", "1024x768", "Full screen"});
+  resolutionChoice->addItems({ "640x480", "800x600", "1024x768", "1280x720", "1366x768", "Full screen"});
   resolutionChoice->setCurrentText(QString(loadedSettings.find("Resolution")->second.c_str()));
   QFormLayout * layout = new QFormLayout(m_settingsWidget);
   layout->addRow("Resolution", resolutionChoice);
   layout->addRow("Difficulty", difficultyChoice);
   layout->setFormAlignment(Qt::AlignHCenter | Qt::AlignCenter);
+
+  QPixmap background("data/background.jpg");
+  background = background.scaled(this->size());
+  QPalette palette;
+  palette.setBrush(QPalette::Background, background);
+  setPalette(palette);
 
   m_stack->addWidget(m_mainWidget);
   m_stack->addWidget(m_settingsWidget);

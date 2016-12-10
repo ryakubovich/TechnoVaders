@@ -32,6 +32,12 @@ public:
     return os;
   }
 
+  void ChangeDirection(float kWidth, float kHeight)
+  {
+    m_direction.x() *= kWidth;
+    m_direction.y() *= kHeight;
+  }
+
 private:
   float m_velocity = 1;
   float m_power = 100;
@@ -44,7 +50,7 @@ class BulletManager
 {
 public:
   BulletManager(int screenWidth, int screenHeight)
-    : m_screenWidth(screenWidth), m_screenHeight(screenHeight)
+    : m_screenWidth(screenWidth), m_screenHeight(screenHeight)/*, m_kWidth(screenWidth / 1366.0f), m_kHeight(screenHeight / 768.0f)*/
   {}
 
   BulletManager() : BulletManager(10000, 5000) {}
@@ -72,17 +78,31 @@ public:
   {
     m_screenWidth = width;
     m_screenHeight = height;
+//    m_kWidth = (width / 1366.0f) / m_kWidth;
+//    m_kHeight = (height / 768.0f) / m_kHeight;
+//    for (auto it = m_playersBullets.begin(); it != m_playersBullets.end(); ++it)
+//    {
+//      it->ResizeBox(m_kWidth, m_kHeight);
+//      it->ChangeDirection(m_kWidth, m_kHeight);
+//    }
+//    for (auto mit = m_playersMissiles.begin(); mit != m_playersMissiles.end(); ++mit)
+//    {
+//      mit->ResizeBox(m_kWidth, m_kHeight);
+//      mit->ChangeDirection(m_kWidth, m_kHeight);
+//    }
+//    for (auto ait = m_aliensBullets.begin(); ait != m_aliensBullets.end(); ++ait)
+//    {
+//      ait->ResizeBox(m_kWidth, m_kHeight);
+//      ait->ChangeDirection(m_kWidth, m_kHeight);
+//    }
+//    Logger::Instance() << m_kWidth << m_kHeight;
   }
 
-  void CreateBullet(bool playersBullet, Box2D const & box)
-  {
-    if (playersBullet) m_playersBullets.emplace_back(Bullet(box));
-    else m_aliensBullets.emplace_back(Bullet(box));
-  }
   void CreateBullet(bool playersBullet, Box2D const & box, float velocity, float power, Point2D const & direction)
   {
-    if (playersBullet) m_playersBullets.emplace_back(Bullet(box, velocity, power, direction));
-    else m_aliensBullets.emplace_back(Bullet(box, velocity, power, direction));
+    if (playersBullet) m_playersBullets.emplace_back(Bullet(box, velocity, power,
+                                                            direction/*Point2D(direction.x() * m_kWidth, direction.y() * m_kHeight)*/));
+    else m_aliensBullets.emplace_back(Bullet(box, velocity, power, direction /*Point2D(direction.x() * m_kWidth, direction.y() * m_kHeight)*/));
   }
 
   bool DeleteBullet(bool playersBullet, Bullet const & bullet)
@@ -99,10 +119,9 @@ public:
     }
   }
 
-  void CreateMissile(Box2D const & box) { m_playersMissiles.emplace_back(Bullet(box)); }
   void CreateMissile(Box2D const & box, float velocity, float power, Point2D const & direction)
   {
-    m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction));
+    m_playersMissiles.emplace_back(Bullet(box, velocity, power, direction /*Point2D(direction.x() * m_kWidth, direction.y() * m_kHeight)*/));
   }
 
   bool DeleteMissile(Bullet const & bullet)
@@ -120,7 +139,7 @@ public:
     try
     {
       auto it = m_playersMissiles.begin();
-      it->Move(elapsedSeconds, movement);
+      it->Move(elapsedSeconds, movement /*Point2D(m_kWidth * movement.x(), m_kHeight * movement.y())*/);
     }
     catch (std::exception const & ex)
     {
@@ -152,6 +171,8 @@ public:
 private:
   int m_screenWidth;
   int m_screenHeight;
+//  float m_kWidth;
+//  float m_kHeight;
   // Lists are used because of frequent deletion of randomly placed bullets
   TBullets m_playersBullets;
   TBullets m_aliensBullets;

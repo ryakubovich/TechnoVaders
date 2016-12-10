@@ -1,7 +1,6 @@
 #pragma once
 
 #include "alien.hpp"
-#include "obstacle.hpp"
 #include "player.hpp"
 #include "ray2d.hpp"
 #include <chrono>
@@ -17,15 +16,9 @@ class AI
 public:
   AI(int aliensNumber, float health, std::string const & name, int holderAmmo,
      float bulletCaliber, float bulletVelocity, BulletManager & bm, float shotChance, int screenWidth, int screenHeight)
-    : m_screenWidth(screenWidth), m_screenHeight(screenHeight), m_lastShotTimestamp(std::chrono::steady_clock::now()),
-      m_shotChance(shotChance)
+    : m_screenWidth(screenWidth), m_screenHeight(screenHeight), /*m_kWidth(screenWidth / 1366.0f), m_kHeight(screenHeight / 768.0f),*/
+      m_lastShotTimestamp(std::chrono::steady_clock::now()), m_shotChance(shotChance)
   {
-    // Some algo to create aliens and to distribute them across the space
-    // This is a test constructor
-//    for (int i = 0; i < 6; ++i)
-//      m_aliens.emplace_back(Alien(Box2D(Point2D(i * 105.0f + 3.0f, 400.0f), Point2D((i+1) * 105.0f + 2.0f, 477.0f)),
-//                                  100.0f, "M16A1", 10, 1.0f, 50.0f, 0.0f, 0.0f, 0.0f, bm));
-
     int constructedAliens, i;
     constructedAliens = i = 0;
     int row = 1;
@@ -66,7 +59,7 @@ public:
     if (m_aliens.size() == 0 && m_noAliensHandler != nullptr) m_noAliensHandler();
   }
 
-  void Shot(std::list<Obstacle> const & obstacles, Player const & player)
+  void Shot(Player const & player)
   {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_lastShotTimestamp);
     if (duration.count() > 300)
@@ -87,6 +80,14 @@ public:
   {
     m_screenWidth = width;
     m_screenHeight = height;
+//    m_kWidth = (width / 1366.0f)  / m_kWidth;
+//    m_kHeight = (height / 768.0f) / m_kHeight;
+//    for (auto ait = m_aliens.begin(); ait != m_aliens.end(); ++ait)
+//    {
+//      ait->ResizeBox(m_kWidth, m_kHeight);
+//      ait->Move(Point2D(0.0f, height - ait->GetBox().GetMax().y()));
+//    }
+//    Logger::Instance() << m_kWidth << m_kHeight;
   }
 
 
@@ -125,6 +126,8 @@ public:
 private:
   int m_screenWidth;
   int m_screenHeight;
+//  float m_kWidth;
+//  float m_kHeight;
   Point2D m_movement = { 100.0f, 0.0f };
   std::chrono::time_point<std::chrono::steady_clock> m_lastShotTimestamp;
   float m_shotChance;
